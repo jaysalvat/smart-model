@@ -33,7 +33,7 @@ import SmartModel from '@jaysalvat/smart-model'
 ### CDN
 
 ```html
-<script src="https://unpkg.com/@jaysalvat/model@latest/build/smart-model.umd.min.js"></script>
+<script src="https://unpkg.com/@jaysalvat/smart-model@latest/build/smart-model.umd.min.js"></script>
 ```
 
 ## Usage
