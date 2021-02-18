@@ -33,8 +33,8 @@ shell.exec('git commit -m "Build v' + getVersion() + '"')
 shell.exec('git push')
 
 function getVersion() {
-  import pkg from 'shelljs'
-  return root + pkg.version
+  import { version } from '../package.json'
+  return root + version
 }
 
 function getResult(cmd) {
