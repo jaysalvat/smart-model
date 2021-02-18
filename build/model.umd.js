@@ -1,3 +1,12 @@
+
+/**!
+* model
+* Javascript object model
+* https://github.com/jaysalvat/super-store
+* @version 0.1.1 built 2021-02-18 18:16:27
+* @license ISC
+* @author Jay Salvat http://jaysalvat.com
+*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
