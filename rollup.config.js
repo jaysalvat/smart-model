@@ -1,8 +1,8 @@
 import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
-const NAME = 'Model'
-const FILENAME = 'model'
+const NAME = 'smartModel'
+const FILENAME = 'smart-model'
 const SRC = './src'
 const DIST = './build'
 const DATE = new Date().toISOString().replace(/[TZ]/g, ' ').split('.')[0]
@@ -12,12 +12,12 @@ const formats = [ 'esm', 'esm.min', 'umd', 'umd.min' ]
 const mutedWarnings = [ 'CIRCULAR_DEPENDENCY' ]
 const watched = process.env.ROLLUP_WATCH
 
-const bannerLight = `/*! ${FILENAME} v${pkg.version} */`
+const bannerLight = `/*! ${NAME} v${pkg.version} */`
 const bannerFull = `
 /**!
-* ${FILENAME}
+* ${NAME}
 * ${pkg.description}
-* https://github.com/jaysalvat/super-store
+* https://github.com/jaysalvat/${FILENAME}
 * @version ${pkg.version} built ${DATE}
 * @license ${pkg.license}
 * @author Jay Salvat http://jaysalvat.com
