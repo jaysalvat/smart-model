@@ -54,12 +54,12 @@ export function checkErrors(entry, property, value) {
     Object.keys(entry.rule).forEach((key) => {
       const rule = entry.rule[key]
 
-      if (!rule(value)) {
+      if (rule(value)) {
         errors.push({
           message: `Invalid value '${key}' on property '${property}'`,
           code: key,
           value: value,
-          expected: rule(value)
+          expected: rule
         })
       }
     })

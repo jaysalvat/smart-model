@@ -1,12 +1,3 @@
-
-/**!
-* smartModel
-* Javascript object model
-* https://github.com/jaysalvat/smart-model
-* @version 0.1.3 built 2021-02-18 19:03:38
-* @license ISC
-* @author Jay Salvat http://jaysalvat.com
-*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -68,12 +59,12 @@
       Object.keys(entry.rule).forEach((key) => {
         const rule = entry.rule[key];
 
-        if (!rule(value)) {
+        if (rule(value)) {
           errors.push({
             message: `Invalid value '${key}' on property '${property}'`,
             code: key,
             value: value,
-            expected: rule(value)
+            expected: rule
           });
         }
       });

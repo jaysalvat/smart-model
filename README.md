@@ -41,6 +41,8 @@ import SmartModel from '@jaysalvat/smart-model'
 Better documentation soon...
 
 ```javascript
+import readingTime from 'reading-time';
+
 const Post = SmartModel.create('Post', {
   title: {
     required: true,
@@ -49,6 +51,10 @@ const Post = SmartModel.create('Post', {
   body: {
     required: true,
     type: String,
+    rule: {
+      'tooShort': (calue) => value.length < 100,
+      'tooLong': (calue) => value.length > 1000,
+    }
   },
   createdAt: {
     type: Date,
@@ -63,6 +69,7 @@ const Post = SmartModel.create('Post', {
     format: (value) => value.toLocaleString()
   },
   bodyLength: (post) => post.body.length, 
+  readingTime: (post) => readingTime(post.body)
 }, {
   onUpdate() {
     this.updatedAt = new Date()
