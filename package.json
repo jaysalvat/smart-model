@@ -11,13 +11,13 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "dev": "rollup -c -w",
-    "clean": "node ./scripts/clean.js",
+    "clean": "node ./scripts/clean.cjs",
     "build": "rollup -c",
     "prebuild": "npm run clean",
-    "release": "node ./scripts/release.js patch",
-    "release:patch": "node ./scripts/release.js patch",
-    "release:minor": "node ./scripts/release.js minor",
-    "release:major": "node ./scripts/release.js major"
+    "release": "node ./scripts/release.cjs patch",
+    "release:patch": "node ./scripts/release.cjs patch",
+    "release:minor": "node ./scripts/release.cjs minor",
+    "release:major": "node ./scripts/release.cjs major"
   },
   "repository": {
     "type": "git",
