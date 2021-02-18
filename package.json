@@ -1,0 +1,44 @@
+{
+  "name": "@jaysalvat/smart-model",
+  "version": "0.1.0",
+  "description": "Javascript object model",
+  "main": "./build/smart-model.umd.js",
+  "module": "./build/smart-model.esm.js",
+  "browser": "./build/smart-model.umd.min.js",
+  "type": "module",
+  "scripts": {
+    "test": "open http://localhost:5500/test/index.html && light-server -s . -p 5500",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "dev": "rollup -c -w",
+    "clean": "node ./scripts/clean.js",
+    "build": "rollup -c",
+    "prebuild": "npm run clean",
+    "release": "node ./scripts/release.js patch",
+    "release:patch": "node ./scripts/release.js patch",
+    "release:minor": "node ./scripts/release.js minor",
+    "release:major": "node ./scripts/release.js major"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaysalvat/smart-model.git"
+  },
+  "keywords": [
+    "javascript",
+    "model",
+    "object",
+    "data"
+  ],
+  "author": "Jay Salvat",
+  "license": "ISC",
+  "devDependencies": {
+    "@jaysalvat/eslint-config": "^1.0.2",
+    "chai": "^4.3.0",
+    "eslint": "^7.20.0",
+    "light-server": "^2.9.1",
+    "mocha": "^8.3.0",
+    "rollup": "^2.39.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "shelljs": "^0.8.4"
+  }
+}
