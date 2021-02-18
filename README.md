@@ -54,21 +54,23 @@ const Post = SmartModel.create('Post', {
     type: Date,
     default: new Date(),
     transform: (value) => new Date(value),
-    format: (value) => new Date().toLocaleString()
+    format: (value) => value.toLocaleString()
   },
   updatedAt: {
     type: Date,
     default: new Date(),
     transform: (value) => new Date(value),
-    format: (value) => new Date().toLocaleString()
+    format: (value) => value.toLocaleString()
   },
   bodyLength: (post) => post.body.length, 
 }, {
   onUpdate() {
-    this.updateAt = new Date()
+    this.updatedAt = new Date()
   }
 })
+```
 
+```javascript
 const post = new Post({
   title: 'my new post',
   body: 'lorem ipsum...'
