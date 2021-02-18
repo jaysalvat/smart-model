@@ -34,7 +34,7 @@ class ModelHandler {
       trigger(target.onBeforeUpdate)
     }
 
-    if (Model.settings.exeptions) {
+    if (Model.settings.exceptions) {
       const errors = checkErrors(entry, property, value)
 
       if (errors.length) {
@@ -42,7 +42,7 @@ class ModelHandler {
           throw new ModelError({
             message: error.message,
             property: property,
-            type: error.type,
+            code: error.code,
             value: error.value,
             expected: error.expected
           })
@@ -67,10 +67,6 @@ class ModelHandler {
     let value = target[property]
     const schema = this.schema
     const entry = schema[property]
-
-    if (target.hasOwnProperty(property)) {
-      return target[property]
-    }
     
     if (!entry) {
       return target[property]

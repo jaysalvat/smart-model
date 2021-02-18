@@ -1,12 +1,3 @@
-
-/**!
-* smartModel
-* Javascript object model
-* https://github.com/jaysalvat/smart-model
-* @version 0.1.2 built 2021-02-18 18:19:04
-* @license ISC
-* @author Jay Salvat http://jaysalvat.com
-*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -35,8 +26,8 @@
     if (entry.required) {
       if (isEmpty(value)) {
         errors.push({
-          message: `Invalid type 'required' on property '${property}'`,
-          type: 'required',
+          message: `Invalid value 'required' on property '${property}'`,
+          code: 'required',
           value: value
         });
       }
@@ -57,7 +48,7 @@
       if (!typeOk) {
         errors.push({
           message: `Invalid type '${typeof value}' on property '${property}'`,
-          type: 'type',
+          code: 'type',
           value: value,
           expected: types
         });
@@ -71,7 +62,7 @@
         if (!rule(value)) {
           errors.push({
             message: `Invalid value '${key}' on property '${property}'`,
-            type: key,
+            code: key,
             value: value,
             expected: rule(value)
           });
@@ -121,7 +112,7 @@
         trigger(target.onBeforeUpdate);
       }
 
-      if (Model.settings.exeptions) {
+      if (Model.settings.exceptions) {
         const errors = checkErrors(entry, property, value);
 
         if (errors.length) {
@@ -129,7 +120,7 @@
             throw new ModelError({
               message: error.message,
               property: property,
-              type: error.type,
+              code: error.code,
               value: error.value,
               expected: error.expected
             })
@@ -154,10 +145,6 @@
       let value = target[property];
       const schema = this.schema;
       const entry = schema[property];
-
-      if (target.hasOwnProperty(property)) {
-        return target[property]
-      }
       
       if (!entry) {
         return target[property]

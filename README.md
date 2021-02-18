@@ -50,11 +50,22 @@ const Post = SmartModel.create('Post', {
     required: true,
     type: String,
   },
-  date: {
+  createdAt: {
     type: Date,
     default: new Date(),
     transform: (value) => new Date(value),
     format: (value) => new Date().toLocaleString()
+  },
+  updatedAt: {
+    type: Date,
+    default: new Date(),
+    transform: (value) => new Date(value),
+    format: (value) => new Date().toLocaleString()
+  },
+  bodyLength: (post) => post.body.length, 
+}, {
+  onUpdate() {
+    this.updateAt = new Date()
   }
 })
 

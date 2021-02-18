@@ -21,8 +21,8 @@ export function checkErrors(entry, property, value) {
   if (entry.required) {
     if (isEmpty(value)) {
       errors.push({
-        message: `Invalid type 'required' on property '${property}'`,
-        type: 'required',
+        message: `Invalid value 'required' on property '${property}'`,
+        code: 'required',
         value: value
       })
     }
@@ -43,7 +43,7 @@ export function checkErrors(entry, property, value) {
     if (!typeOk) {
       errors.push({
         message: `Invalid type '${typeof value}' on property '${property}'`,
-        type: 'type',
+        code: 'type',
         value: value,
         expected: types
       })
@@ -57,7 +57,7 @@ export function checkErrors(entry, property, value) {
       if (!rule(value)) {
         errors.push({
           message: `Invalid value '${key}' on property '${property}'`,
-          type: key,
+          code: key,
           value: value,
           expected: rule(value)
         })

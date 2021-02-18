@@ -1,6 +1,6 @@
 /* eslint-disable no-process-exit */
 
-const shell = require('shelljs')
+import shell from 'shelljs'
 
 const root = __dirname + '/../'
 const version = process.argv[2]
@@ -33,7 +33,8 @@ shell.exec('git commit -m "Build v' + getVersion() + '"')
 shell.exec('git push')
 
 function getVersion() {
-  return require(root + 'package.json').version
+  import pkg from 'shelljs'
+  return root + pkg.version
 }
 
 function getResult(cmd) {
