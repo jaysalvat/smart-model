@@ -14,7 +14,7 @@ Javascript object model.
 - [x] Virtual property
 - [x] Live cycle events
 - [ ] Proper documentation ^^
-- [ ] decent tests ^^
+- [ ] Decent tests ^^
 
 ## Install
 
