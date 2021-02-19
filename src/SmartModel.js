@@ -41,7 +41,7 @@ SmartModel.settings = {
   exceptions: true
 }
 
-SmartModel.create = function (name, schema, prototype, settings = {}) {
+SmartModel.create = function (name, schema, settings, prototype) {
   settings = Object.assign({}, SmartModel.settings, settings)
 
   const Model = { [name]: class extends SmartModel {

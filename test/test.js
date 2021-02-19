@@ -314,7 +314,9 @@ describe('SmartModel', function () {
     })
   })
 
-  describe('Virtual', function () {
+  // Virtual property
+
+  describe('Virtual property', function () {
     it('should get a virtual property', function () {
       const Model = SmartModel.create('Model', {
         today: () => new Date()
@@ -349,8 +351,10 @@ describe('SmartModel', function () {
     it('should trigger onUpdate', testTrigger('onUpdate'))
   })
 
+  // Methods
+
   describe('Statics methods', function () {
-    describe('checkErrors', function () {
+    describe('CheckErrors', function () {
       it('should return an array of model errors', function () {
         const Model = SmartModel.create('Model', {
           prop1: { required: true },
@@ -416,7 +420,7 @@ describe('SmartModel', function () {
       })
     })
 
-    describe('hydrate', function () {
+    describe('Hydrate', function () {
       it('should hydrate a object', function () {
         const obj = {
           prop1: 'ok'
@@ -454,8 +458,9 @@ describe('SmartModel', function () {
       })
     })
 
-    describe('Settings', function () {
+    // Settings
 
+    describe('Settings', function () {
       it('should set settings for all instances', function () {
         SmartModel.settings.strict = true
 
@@ -465,7 +470,7 @@ describe('SmartModel', function () {
 
         const Model2 = SmartModel.create('Model2', {
           prop1: { type: String }
-        }, {}, { strict: false })
+        }, { strict: false })
 
         const Model3 = SmartModel.create('Model3', {
           prop1: { type: String }
@@ -500,7 +505,7 @@ describe('SmartModel', function () {
         it('should not set undefined properties if strict:true', function () {
           const Model = SmartModel.create('Model', {
             prop1: { type: String }
-          }, {}, {
+          }, {
             strict: true
           })
 
@@ -516,7 +521,7 @@ describe('SmartModel', function () {
         it('should set undefined properties if strict:false', function () {
           const Model = SmartModel.create('Model', {
             prop1: { type: String }
-          }, {}, {
+          }, {
             strict: false
           })
 
@@ -534,7 +539,7 @@ describe('SmartModel', function () {
         it('should not throw exceptions if exceptions:false', function () {
           const Model = SmartModel.create('Model', {
             prop1: { required: true }
-          }, {}, {
+          }, {
             exceptions: false
           })
 
@@ -546,7 +551,7 @@ describe('SmartModel', function () {
         it('should throw exceptions if exceptions:true', function () {
           const Model = SmartModel.create('Model', {
             prop1: { required: true }
-          }, {}, {
+          }, {
             exceptions: true
           })
 
@@ -563,7 +568,7 @@ describe('SmartModel', function () {
       let property, value, oldValue
       const Model = SmartModel.create('Model', {
         prop: { default: 'old value' }
-      }, {
+      }, {}, {
         [name](prop, val, oldVal) {
           property = prop
           value = val
