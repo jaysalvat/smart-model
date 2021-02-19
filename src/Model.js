@@ -1,5 +1,5 @@
 
-import { toArray, isArray, checkErrors } from './utils.js'
+import { clone, toArray, isArray, checkErrors } from './utils.js'
 import ModelHandler from './ModelHandler.js'
 
 class Model {
@@ -14,6 +14,8 @@ class Model {
   }
 
   feed(data) {
+    data = clone(data)
+
     Object.keys(data).forEach((key) => {
       this[key] = data[key]
     })
@@ -38,7 +40,7 @@ Model.create = function (name, schema, prototype, settings = {}) {
 
   const SuperModel = { [name]: class extends Model {
     constructor(data) {
-      super(schema, data)
+      super(schema)
 
       return new Proxy(this, new ModelHandler(schema, settings))
     }
