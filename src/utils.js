@@ -26,8 +26,6 @@ export function toArray(value) {
 export function checkErrors(entry, property, value) {
   const errors = []
 
-  console.log(entry, value)
-
   if (entry.required && isEmpty(value)) {
     errors.push({
       message: `Invalid value 'required' on property '${property}'`,

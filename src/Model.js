@@ -44,45 +44,39 @@ Model.create = function (name, schema, prototype, settings = {}) {
     }
   } }[name]
 
-  SuperModel.checkErrors = function (payload, required) {
-    return Model.checkErrors(schema, payload, required)
+  SuperModel.checkErrors = function (payload, filters) {
+    const invalidations = {}
+
+    Object.keys(schema).forEach((property) => {
+      const value = payload[property]
+      const entry = schema[property]
+      let errors = checkErrors(entry, property, value)
+
+      if (errors.length) {
+        if (filters) {
+          errors = errors.filter((error) => !toArray(filters).includes(error.code))
+        }
+
+        if (errors.length) {
+          invalidations[property] = errors
+        }
+      }
+    })
+
+    return Object.keys(invalidations).length ? invalidations : false
+  }
+
+  SuperModel.hydrate = function (payload) {
+    if (isArray(payload)) {
+      return payload.map((item) => new SuperModel(item))
+    }
+
+    return new SuperModel(payload)
   }
 
   Object.assign(SuperModel.prototype, prototype)
 
   return SuperModel
-}
-
-Model.checkErrors = function (schema, payload, filters) {
-  const invalidations = {}
-
-  Object.keys(schema).forEach((property) => {
-    const value = payload[property]
-    const entry = schema[property]
-    let errors = checkErrors(entry, property, value)
-
-    if (errors.length) {
-      if (filters) {
-        errors = errors.filter((error) => !toArray(filters).includes(error.code))
-      }
-
-      if (errors.length) {
-        invalidations[property] = errors
-      }
-    }
-
-    return
-  })
-
-  return Object.keys(invalidations).length ? invalidations : false
-}
-
-Model.hydrate = function (ModelToHydrate, payload) {
-  if (isArray(payload)) {
-    return payload.map((item) => new ModelToHydrate(item))
-  }
-
-  return new ModelToHydrate(payload)
 }
 
 export default Model
