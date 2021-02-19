@@ -145,9 +145,9 @@
     }
 
     get(target, property) {
-      let value = target[property];
       const schema = this.schema;
       const entry = schema[property];
+      let value = target[property];
 
       if (!entry) {
         return target[property]
@@ -173,7 +173,7 @@
     }
 
     deleteProperty(target, property) {
-      const value = clone(target[property]);
+      const oldValue = clone(target[property]);
       const schema = this.schema;
       const entry = schema[property];
       let undef;
@@ -192,7 +192,7 @@
 
       Reflect.deleteProperty(target, property);
 
-      trigger(target.onDelete, [ property, value, schema ]);
+      trigger(target.onDelete, [ property, oldValue, schema ]);
       trigger(target.onUpdate, [ property, undef, schema ]);
 
       return true
@@ -233,7 +233,7 @@
   Model.create = function (name, schema, prototype, settings = {}) {
     settings = Object.assign({}, Model.settings, settings);
 
-    const ModelClass = { [name]: class extends Model {
+    const SuperModel = { [name]: class extends Model {
       constructor(data) {
         super(schema, data);
 
@@ -241,13 +241,13 @@
       }
     } }[name];
 
-    ModelClass.checkErrors = function (payload, required) {
+    SuperModel.checkErrors = function (payload, required) {
       return Model.checkErrors(schema, payload, required)
     };
 
-    Object.assign(ModelClass.prototype, prototype);
+    Object.assign(SuperModel.prototype, prototype);
 
-    return ModelClass
+    return SuperModel
   };
 
   Model.checkErrors = function (schema, payload, filters) {

@@ -36,7 +36,7 @@ Model.settings = {
 Model.create = function (name, schema, prototype, settings = {}) {
   settings = Object.assign({}, Model.settings, settings)
 
-  const ModelClass = { [name]: class extends Model {
+  const SuperModel = { [name]: class extends Model {
     constructor(data) {
       super(schema, data)
 
@@ -44,13 +44,13 @@ Model.create = function (name, schema, prototype, settings = {}) {
     }
   } }[name]
 
-  ModelClass.checkErrors = function (payload, required) {
+  SuperModel.checkErrors = function (payload, required) {
     return Model.checkErrors(schema, payload, required)
   }
 
-  Object.assign(ModelClass.prototype, prototype)
+  Object.assign(SuperModel.prototype, prototype)
 
-  return ModelClass
+  return SuperModel
 }
 
 Model.checkErrors = function (schema, payload, filters) {

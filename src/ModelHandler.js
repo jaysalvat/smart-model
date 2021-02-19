@@ -59,9 +59,9 @@ class ModelHandler {
   }
 
   get(target, property) {
-    let value = target[property]
     const schema = this.schema
     const entry = schema[property]
+    let value = target[property]
 
     if (!entry) {
       return target[property]
@@ -87,7 +87,7 @@ class ModelHandler {
   }
 
   deleteProperty(target, property) {
-    const value = clone(target[property])
+    const oldValue = clone(target[property])
     const schema = this.schema
     const entry = schema[property]
     let undef
@@ -106,7 +106,7 @@ class ModelHandler {
 
     Reflect.deleteProperty(target, property)
 
-    trigger(target.onDelete, [ property, value, schema ])
+    trigger(target.onDelete, [ property, oldValue, schema ])
     trigger(target.onUpdate, [ property, undef, schema ])
 
     return true
