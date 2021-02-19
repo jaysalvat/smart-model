@@ -16,7 +16,7 @@ export default function checkErrors(entry, property, value) {
     return errors
   }
 
-  if (entry.type && entry.required || !isEmpty(value)) {
+  if (entry.type && (entry.required || !isEmpty(value))) {
     if (!toArray(entry.type).some((type) => isType(value, type))) {
       errors.push({
         message: `Invalid type '${typeof value}' on property '${property}'`,

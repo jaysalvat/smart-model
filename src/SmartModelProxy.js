@@ -30,7 +30,7 @@ class SmartModelProxy {
         }
 
         if (entry.transform) {
-          value = trigger(entry.transform, [ value ])
+          value = trigger(entry.transform, [ value, schema ])
         }
 
         if (settings.exceptions) {
@@ -73,11 +73,11 @@ class SmartModelProxy {
         trigger(target.onBeforeGet)
 
         if (isFn(entry)) {
-          value = trigger(entry, [ target ])
+          value = trigger(entry, [ target, schema ])
         }
 
         if (isFn(entry.format)) {
-          value = trigger(entry.format)
+          value = trigger(entry.format, [ value, schema ])
         }
 
         trigger(target.onGet)
@@ -97,9 +97,11 @@ class SmartModelProxy {
           throw new SmartModelError({
             message: `Invalid delete on required propery ${property}`,
             property: property,
-            code: 'delete'
+            code: 'required'
           })
         }
+
+        trigger(target.onBeforeDelete)
 
         Reflect.deleteProperty(target, property)
 

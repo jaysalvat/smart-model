@@ -26,13 +26,14 @@ class SmartModel extends SmartModelProxy {
     })
   }
 
-  onSet() {}
-  onGet() {}
-  onDelete() {}
-  onUpdate() {}
-  onBeforeSet() {}
   onBeforeGet() {}
+  onBeforeSet() {}
   onBeforeUpdate() {}
+  onDelete() {}
+  onGet() {}
+  onBeforeDelete() {}
+  onSet() {}
+  onUpdate() {}
 }
 
 SmartModel.settings = {
