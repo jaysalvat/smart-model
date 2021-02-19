@@ -1,3 +1,3 @@
-import SuperModel from './SuperModel.js'
+import SmartModel from './SmartModel.js'
 
-export default SuperModel
+export default SmartModel
