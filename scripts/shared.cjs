@@ -14,7 +14,7 @@ exports.read = function (cmd) {
 }
 
 exports.info = function (msg) {
-  console.log(cyan, msg, nc)
+  console.log(cyan, msg, nc, '\n')
 }
 
 exports.exit = function (msg) {

@@ -1,7 +1,7 @@
-const shell = require('shelljs')
+const sh = require('./shared.cjs')
 
 const root = __dirname + '/../'
 
-shell.echo('Clean build dir')
-shell.rm('-rf', root + 'build')
+sh.info('Clean build dir')
+sh.rm('-rf', root + 'build')
 

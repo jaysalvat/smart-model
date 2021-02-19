@@ -21,9 +21,6 @@ if (dirty) {
 sh.info('Bump version')
 sh.exec('npm version ' + version)
 
-sh.info('Clean build dir')
-sh.rm(root + 'build')
-
 sh.info('Build bundles')
 sh.exec('npm run build')
 
