@@ -3,7 +3,7 @@
 * smartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.3 built 2021-02-19 15:03:17
+* @version 0.2.4 built 2021-02-19 15:04:14
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
