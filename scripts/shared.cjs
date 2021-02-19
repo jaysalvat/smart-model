@@ -29,9 +29,17 @@ exports.rm = function (path) {
 exports.exec = function (cmd) {
   const std = shell.exec(cmd, { silent: true })
 
-  if (std.stderr) {
-    console.error(red, std.stderr, nc);
-  } else {
-    console.log(std.stdout);
+  text('log', std.stdout)
+  text('error', std.stderr)
+}
+
+function text(type, std) {
+  const lines = std
+    .split('\n')
+    .map((line) => line.match(/(Error:|ERR!|    at )/) ? red + line + nc : line)
+    .join('\n')
+
+  if (lines) {
+    console[type](lines)
   }
 }

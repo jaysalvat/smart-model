@@ -33,7 +33,7 @@ formats.forEach((type) => {
       exports: 'named',
       format: format,
       file: DIST + '/' + filename,
-      name: format === 'umd' ? NAME : null,
+
       banner: !watched && (minify ? bannerLight : bannerFull),
       plugins: [
         !watched && minify ? terser() : null
