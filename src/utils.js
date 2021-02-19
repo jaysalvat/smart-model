@@ -15,17 +15,28 @@ export function isEqual(value1, value2) {
   return JSON.stringify(value1) === JSON.stringify(value2)
 }
 
+export function clone(value) {
+  return value ? JSON.parse(JSON.stringify(value)) : value
+}
+
+export function toArray(value) {
+  return [].concat([], value)
+}
+
 export function checkErrors(entry, property, value) {
   const errors = []
 
-  if (entry.required) {
-    if (isEmpty(value)) {
-      errors.push({
-        message: `Invalid value 'required' on property '${property}'`,
-        code: 'required',
-        value: value
-      })
-    }
+  if (entry.required && isEmpty(value)) {
+    errors.push({
+      message: `Invalid value 'required' on property '${property}'`,
+      code: 'required'
+    })
+
+    return errors
+  }
+
+  if (typeof value === 'undefined') {
+    return errors
   }
 
   if (entry.type) {
@@ -43,9 +54,7 @@ export function checkErrors(entry, property, value) {
     if (!typeOk) {
       errors.push({
         message: `Invalid type '${typeof value}' on property '${property}'`,
-        code: 'type',
-        value: value,
-        expected: types
+        code: 'type'
       })
     }
   }
@@ -57,9 +66,7 @@ export function checkErrors(entry, property, value) {
       if (rule(value)) {
         errors.push({
           message: `Invalid value '${key}' on property '${property}'`,
-          code: key,
-          value: value,
-          expected: rule
+          code: key
         })
       }
     })

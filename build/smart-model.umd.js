@@ -1,12 +1,3 @@
-
-/**!
-* smartModel
-* Javascript object model
-* https://github.com/jaysalvat/smart-model
-* @version 0.1.4 built 2021-02-18 19:15:57
-* @license ISC
-* @author Jay Salvat http://jaysalvat.com
-*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -29,17 +20,28 @@
     return JSON.stringify(value1) === JSON.stringify(value2)
   }
 
+  function clone(value) {
+    return value ? JSON.parse(JSON.stringify(value)) : value
+  }
+
+  function toArray(value) {
+    return [].concat([], value)
+  }
+
   function checkErrors(entry, property, value) {
     const errors = [];
 
-    if (entry.required) {
-      if (isEmpty(value)) {
-        errors.push({
-          message: `Invalid value 'required' on property '${property}'`,
-          code: 'required',
-          value: value
-        });
-      }
+    if (entry.required && isEmpty(value)) {
+      errors.push({
+        message: `Invalid value 'required' on property '${property}'`,
+        code: 'required'
+      });
+
+      return errors
+    }
+
+    if (typeof value === 'undefined') {
+      return errors
     }
 
     if (entry.type) {
@@ -57,9 +59,7 @@
       if (!typeOk) {
         errors.push({
           message: `Invalid type '${typeof value}' on property '${property}'`,
-          code: 'type',
-          value: value,
-          expected: types
+          code: 'type'
         });
       }
     }
@@ -71,9 +71,7 @@
         if (rule(value)) {
           errors.push({
             message: `Invalid value '${key}' on property '${property}'`,
-            code: key,
-            value: value,
-            expected: rule
+            code: key
           });
         }
       });
@@ -90,25 +88,25 @@
   }
 
   class ModelHandler {
-
-    constructor(schema = {}) {
+    constructor(schema = {}, settings = {}) {
       this.schema = schema;
+      this.settings = settings;
     }
-
-    // Setter
 
     set(target, property, value) {
       const schema = this.schema;
-      const entry = schema[property];
-      const oldValue = target[property];
+      const oldValue = clone(target[property]);
       const updated = !isEqual(value, oldValue);
+      let entry = schema[property];
 
       function trigger(method) {
         return Reflect.apply(method, target, [ property, value, oldValue, schema ])
       }
 
-      if (isFn(entry)) {
-        return false
+      if (this.settings.strict && !entry) {
+        return true
+      } else {
+        entry = {};
       }
 
       if (entry.transform) {
@@ -121,7 +119,7 @@
         trigger(target.onBeforeUpdate);
       }
 
-      if (Model.settings.exceptions) {
+      if (this.settings.exceptions) {
         const errors = checkErrors(entry, property, value);
 
         if (errors.length) {
@@ -129,9 +127,7 @@
             throw new ModelError({
               message: error.message,
               property: property,
-              code: error.code,
-              value: error.value,
-              expected: error.expected
+              code: error.code
             })
           });
         }
@@ -148,13 +144,11 @@
       return true
     }
 
-    // Getter
-
     get(target, property) {
       let value = target[property];
       const schema = this.schema;
       const entry = schema[property];
-      
+
       if (!entry) {
         return target[property]
       }
@@ -177,10 +171,35 @@
 
       return value
     }
+
+    deleteProperty(target, property) {
+      const value = clone(target[property]);
+      const schema = this.schema;
+      const entry = schema[property];
+      let undef;
+
+      function trigger(method, args) {
+        return Reflect.apply(method, target, args)
+      }
+
+      if (entry.required) {
+        throw new ModelError({
+          message: `Invalid delete on required propery ${property}`,
+          property: property,
+          code: 'delete'
+        })
+      }
+
+      Reflect.deleteProperty(target, property);
+
+      trigger(target.onDelete, [ property, value, schema ]);
+      trigger(target.onUpdate, [ property, undef, schema ]);
+
+      return true
+    }
   }
 
   class Model {
-
     constructor(schema = {}, data = {}) {
       Object.keys(schema).forEach((key) => {
         if (schema[key].default) {
@@ -199,6 +218,7 @@
 
     onSet() {}
     onGet() {}
+    onDelete() {}
     onUpdate() {}
     onBeforeSet() {}
     onBeforeGet() {}
@@ -206,43 +226,46 @@
   }
 
   Model.settings = {
+    strict: false,
     exceptions: true
   };
 
-  Model.create = function (type, schema = {}, prototype = {}) {
-    const ModelClass = {
-      [type]: class extends Model {
-        constructor(data) {
-          super(schema, data);
+  Model.create = function (name, schema, prototype, settings = {}) {
+    settings = Object.assign({}, Model.settings, settings);
 
-          return new Proxy(this, new ModelHandler(schema))
-        }
+    const ModelClass = { [name]: class extends Model {
+      constructor(data) {
+        super(schema, data);
+
+        return new Proxy(this, new ModelHandler(schema, settings))
       }
+    } }[name];
+
+    ModelClass.checkErrors = function (payload, required) {
+      return Model.checkErrors(schema, payload, required)
     };
 
-    Object.assign(ModelClass[type].prototype, prototype);
+    Object.assign(ModelClass.prototype, prototype);
 
-    return ModelClass[type]
+    return ModelClass
   };
 
-  Model.throwExeptions = function (bool) {
-    Model.settings.exeptions = bool;
-  };
-
-  Model.checkErrors = function (schema, payload) {
+  Model.checkErrors = function (schema, payload, filters) {
     const invalidations = {};
 
     Object.keys(schema).forEach((property) => {
       const value = payload[property];
       const entry = schema[property];
-      const errors = checkErrors(entry, property, value);
-
-      if (typeof entry === 'function') {
-        return
-      }
+      let errors = checkErrors(entry, property, value);
 
       if (errors.length) {
-        invalidations[property] = errors;
+        if (filters) {
+          errors = errors.filter((error) => !toArray(filters).includes(error.code));
+        }
+
+        if (errors.length) {
+          invalidations[property] = errors;
+        }
       }
 
       return
@@ -254,9 +277,9 @@
   Model.hydrate = function (ModelToHydrate, payload) {
     if (isArray(payload)) {
       return payload.map((item) => new ModelToHydrate(item))
-    } else {
-      return new ModelToHydrate(payload)
     }
+
+    return new ModelToHydrate(payload)
   };
 
   exports.default = Model;

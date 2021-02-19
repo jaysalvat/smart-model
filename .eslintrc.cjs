@@ -9,5 +9,8 @@ module.exports = {
   },
   extends: [
     '@jaysalvat/eslint-config'
-  ]
+  ],
+  rules: {
+    'newline-before-return': 2
+  }
 }

@@ -1,27 +1,26 @@
-import { isFn, isEqual, checkErrors } from './utils.js'
-import Model from './Model.js'
+import { clone, isFn, isEqual, checkErrors } from './utils.js'
 import ModelError from './ModelError.js'
 
 class ModelHandler {
-
-  constructor(schema = {}) {
+  constructor(schema = {}, settings = {}) {
     this.schema = schema
+    this.settings = settings
   }
-
-  // Setter
 
   set(target, property, value) {
     const schema = this.schema
-    const entry = schema[property]
-    const oldValue = target[property]
+    const oldValue = clone(target[property])
     const updated = !isEqual(value, oldValue)
+    let entry = schema[property]
 
     function trigger(method) {
       return Reflect.apply(method, target, [ property, value, oldValue, schema ])
     }
 
-    if (isFn(entry)) {
-      return false
+    if (this.settings.strict && !entry) {
+      return true
+    } else {
+      entry = {}
     }
 
     if (entry.transform) {
@@ -34,7 +33,7 @@ class ModelHandler {
       trigger(target.onBeforeUpdate)
     }
 
-    if (Model.settings.exceptions) {
+    if (this.settings.exceptions) {
       const errors = checkErrors(entry, property, value)
 
       if (errors.length) {
@@ -42,9 +41,7 @@ class ModelHandler {
           throw new ModelError({
             message: error.message,
             property: property,
-            code: error.code,
-            value: error.value,
-            expected: error.expected
+            code: error.code
           })
         })
       }
@@ -61,13 +58,11 @@ class ModelHandler {
     return true
   }
 
-  // Getter
-
   get(target, property) {
     let value = target[property]
     const schema = this.schema
     const entry = schema[property]
-    
+
     if (!entry) {
       return target[property]
     }
@@ -89,6 +84,32 @@ class ModelHandler {
     trigger(target.onGet, [ property, value, schema ])
 
     return value
+  }
+
+  deleteProperty(target, property) {
+    const value = clone(target[property])
+    const schema = this.schema
+    const entry = schema[property]
+    let undef
+
+    function trigger(method, args) {
+      return Reflect.apply(method, target, args)
+    }
+
+    if (entry.required) {
+      throw new ModelError({
+        message: `Invalid delete on required propery ${property}`,
+        property: property,
+        code: 'delete'
+      })
+    }
+
+    Reflect.deleteProperty(target, property)
+
+    trigger(target.onDelete, [ property, value, schema ])
+    trigger(target.onUpdate, [ property, undef, schema ])
+
+    return true
   }
 }
 

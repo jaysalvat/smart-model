@@ -1,9 +1,8 @@
 
-import { isArray, checkErrors } from './utils.js'
+import { toArray, isArray, checkErrors } from './utils.js'
 import ModelHandler from './ModelHandler.js'
 
 class Model {
-
   constructor(schema = {}, data = {}) {
     Object.keys(schema).forEach((key) => {
       if (schema[key].default) {
@@ -22,6 +21,7 @@ class Model {
 
   onSet() {}
   onGet() {}
+  onDelete() {}
   onUpdate() {}
   onBeforeSet() {}
   onBeforeGet() {}
@@ -29,43 +29,46 @@ class Model {
 }
 
 Model.settings = {
+  strict: false,
   exceptions: true
 }
 
-Model.create = function (type, schema = {}, prototype = {}) {
-  const ModelClass = {
-    [type]: class extends Model {
-      constructor(data) {
-        super(schema, data)
+Model.create = function (name, schema, prototype, settings = {}) {
+  settings = Object.assign({}, Model.settings, settings)
 
-        return new Proxy(this, new ModelHandler(schema))
-      }
+  const ModelClass = { [name]: class extends Model {
+    constructor(data) {
+      super(schema, data)
+
+      return new Proxy(this, new ModelHandler(schema, settings))
     }
+  } }[name]
+
+  ModelClass.checkErrors = function (payload, required) {
+    return Model.checkErrors(schema, payload, required)
   }
 
-  Object.assign(ModelClass[type].prototype, prototype)
+  Object.assign(ModelClass.prototype, prototype)
 
-  return ModelClass[type]
+  return ModelClass
 }
 
-Model.throwExeptions = function (bool) {
-  Model.settings.exeptions = bool
-}
-
-Model.checkErrors = function (schema, payload) {
+Model.checkErrors = function (schema, payload, filters) {
   const invalidations = {}
 
   Object.keys(schema).forEach((property) => {
     const value = payload[property]
     const entry = schema[property]
-    const errors = checkErrors(entry, property, value)
-
-    if (typeof entry === 'function') {
-      return
-    }
+    let errors = checkErrors(entry, property, value)
 
     if (errors.length) {
-      invalidations[property] = errors
+      if (filters) {
+        errors = errors.filter((error) => !toArray(filters).includes(error.code))
+      }
+
+      if (errors.length) {
+        invalidations[property] = errors
+      }
     }
 
     return
@@ -77,9 +80,9 @@ Model.checkErrors = function (schema, payload) {
 Model.hydrate = function (ModelToHydrate, payload) {
   if (isArray(payload)) {
     return payload.map((item) => new ModelToHydrate(item))
-  } else {
-    return new ModelToHydrate(payload)
   }
+
+  return new ModelToHydrate(payload)
 }
 
 export default Model
