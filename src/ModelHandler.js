@@ -11,26 +11,28 @@ class ModelHandler {
     const schema = this.schema
     const oldValue = clone(target[property])
     const updated = !isEqual(value, oldValue)
-    let entry = schema[property]
+    const entry = schema[property]
 
     function trigger(method) {
       return Reflect.apply(method, target, [ property, value, oldValue, schema ])
     }
 
-    if (this.settings.strict && !entry) {
-      return true
-    } else {
-      entry = {}
-    }
+    if (!entry) {
+      if (!this.settings.strict) {
+        target[property] = value
+      }
 
-    if (entry.transform) {
-      value = entry.transform(value)
+      return true
     }
 
     trigger(target.onBeforeSet)
 
     if (updated) {
       trigger(target.onBeforeUpdate)
+    }
+
+    if (entry.transform) {
+      value = entry.transform(value)
     }
 
     if (this.settings.exceptions) {
