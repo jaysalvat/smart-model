@@ -2,9 +2,13 @@
 const sh = require('./shared.cjs')
 
 const root = __dirname + '/../'
-const version = process.argv[2]
+const version = process.argv[2] || 'patch'
 const branch = sh.read('git rev-parse --abbrev-ref HEAD')
 const dirty = !!sh.read('git diff --stat')
+
+if (![ 'patch', 'minor', 'major' ].includes(version)) {
+  sh.exit('Invalid version ' + version)
+}
 
 if (branch !== 'master') {
   sh.exit('Branch must be master')
