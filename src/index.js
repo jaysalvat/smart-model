@@ -1,3 +1,3 @@
-import SuperModel from './Model.js'
+import SuperModel from './SuperModel.js'
 
 export default SuperModel

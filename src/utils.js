@@ -1,6 +1,10 @@
 
+export function isUndef(value) {
+  return typeof value === 'undefined'
+}
+
 export function isEmpty(value) {
-  return value === '' || value === null || typeof value === 'undefined'
+  return value === '' || value === null || isUndef(value)
 }
 
 export function isFn(value) {
@@ -23,54 +27,6 @@ export function toArray(value) {
   return [].concat([], value)
 }
 
-export function checkErrors(entry, property, value) {
-  const errors = []
-
-  if (entry.required && isEmpty(value)) {
-    errors.push({
-      message: `Invalid value 'required' on property '${property}'`,
-      code: 'required'
-    })
-
-    return errors
-  }
-
-  if (typeof value === 'undefined') {
-    return errors
-  }
-
-  if (entry.type) {
-    let typeOk
-    const types = isArray(entry.type) ? entry.type : [ entry.type ]
-
-    if (!entry.required && isEmpty(value)) {
-      typeOk = true
-    } else {
-      typeOk = types.some((type) => {
-        return typeof value === typeof type() || value instanceof type
-      })
-    }
-
-    if (!typeOk) {
-      errors.push({
-        message: `Invalid type '${typeof value}' on property '${property}'`,
-        code: 'type'
-      })
-    }
-  }
-
-  if (entry.rule) {
-    Object.keys(entry.rule).forEach((key) => {
-      const rule = entry.rule[key]
-
-      if (rule(value)) {
-        errors.push({
-          message: `Invalid value '${key}' on property '${property}'`,
-          code: key
-        })
-      }
-    })
-  }
-
-  return errors
+export function isType(value, type) {
+  return typeof value === typeof type() || value instanceof type
 }
