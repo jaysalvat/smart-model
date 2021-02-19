@@ -3,7 +3,7 @@
 * smartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.4 built 2021-02-19 15:04:14
+* @version 0.2.5 built 2021-02-19 18:00:24
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -61,7 +61,7 @@
       return errors
     }
 
-    if (entry.type && entry.required || !isEmpty(value)) {
+    if (entry.type && (entry.required || !isEmpty(value))) {
       if (!toArray(entry.type).some((type) => isType(value, type))) {
         errors.push({
           message: `Invalid type '${typeof value}' on property '${property}'`,
@@ -121,7 +121,7 @@
           }
 
           if (entry.transform) {
-            value = trigger(entry.transform, [ value ]);
+            value = trigger(entry.transform, [ value, schema ]);
           }
 
           if (settings.exceptions) {
@@ -164,11 +164,11 @@
           trigger(target.onBeforeGet);
 
           if (isFn(entry)) {
-            value = trigger(entry, [ target ]);
+            value = trigger(entry, [ target, schema ]);
           }
 
           if (isFn(entry.format)) {
-            value = trigger(entry.format);
+            value = trigger(entry.format, [ value, schema ]);
           }
 
           trigger(target.onGet);
@@ -188,9 +188,11 @@
             throw new SmartModelError({
               message: `Invalid delete on required propery ${property}`,
               property: property,
-              code: 'delete'
+              code: 'required'
             })
           }
+
+          trigger(target.onBeforeDelete);
 
           Reflect.deleteProperty(target, property);
 
@@ -226,13 +228,14 @@
       });
     }
 
-    onSet() {}
-    onGet() {}
-    onDelete() {}
-    onUpdate() {}
-    onBeforeSet() {}
     onBeforeGet() {}
+    onBeforeSet() {}
     onBeforeUpdate() {}
+    onDelete() {}
+    onGet() {}
+    onBeforeDelete() {}
+    onSet() {}
+    onUpdate() {}
   }
 
   SmartModel.settings = {
@@ -240,7 +243,7 @@
     exceptions: true
   };
 
-  SmartModel.create = function (name, schema, prototype, settings = {}) {
+  SmartModel.create = function (name, schema, settings, prototype) {
     settings = Object.assign({}, SmartModel.settings, settings);
 
     const Model = { [name]: class extends SmartModel {
