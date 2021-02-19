@@ -3,7 +3,7 @@
 * smartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.1 built 2021-02-19 12:37:35
+* @version 0.2.2 built 2021-02-19 12:51:57
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -216,6 +216,8 @@ class Model {
   }
 
   feed(data) {
+    data = clone(data);
+
     Object.keys(data).forEach((key) => {
       this[key] = data[key];
     });
@@ -240,7 +242,7 @@ Model.create = function (name, schema, prototype, settings = {}) {
 
   const SuperModel = { [name]: class extends Model {
     constructor(data) {
-      super(schema, data);
+      super(schema);
 
       return new Proxy(this, new ModelHandler(schema, settings))
     }
