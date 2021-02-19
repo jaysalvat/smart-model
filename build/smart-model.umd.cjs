@@ -1,16 +1,16 @@
 
 /**!
-* smartModel
+* SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.5 built 2021-02-19 18:00:24
+* @version 0.2.5 built 2021-02-19 19:18:31
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.smartModel = {}));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.SmartModel = {}));
 }(this, (function (exports) { 'use strict';
 
   function isUndef(value) {

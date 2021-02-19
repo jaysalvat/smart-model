@@ -1,7 +1,7 @@
 import { terser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
-const NAME = 'smartModel'
+const NAME = 'SmartModel'
 const FILENAME = 'smart-model'
 const SRC = './src'
 const DIST = './build'
