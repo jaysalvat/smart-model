@@ -1,3 +1,12 @@
+
+/**!
+* smartModel
+* Javascript object model
+* https://github.com/jaysalvat/smart-model
+* @version 0.2.0 built 2021-02-19 10:32:47
+* @license ISC
+* @author Jay Salvat http://jaysalvat.com
+*/
 function isEmpty(value) {
   return value === '' || value === null || typeof value === 'undefined'
 }

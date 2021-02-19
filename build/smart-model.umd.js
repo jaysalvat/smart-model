@@ -1,3 +1,12 @@
+
+/**!
+* smartModel
+* Javascript object model
+* https://github.com/jaysalvat/smart-model
+* @version 0.2.0 built 2021-02-19 10:32:47
+* @license ISC
+* @author Jay Salvat http://jaysalvat.com
+*/
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
