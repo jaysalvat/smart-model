@@ -3,7 +3,7 @@
 * smartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.0 built 2021-02-19 10:32:47
+* @version 0.2.1 built 2021-02-19 12:37:35
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -100,26 +100,28 @@ class ModelHandler {
     const schema = this.schema;
     const oldValue = clone(target[property]);
     const updated = !isEqual(value, oldValue);
-    let entry = schema[property];
+    const entry = schema[property];
 
     function trigger(method) {
       return Reflect.apply(method, target, [ property, value, oldValue, schema ])
     }
 
-    if (this.settings.strict && !entry) {
-      return true
-    } else {
-      entry = {};
-    }
+    if (!entry) {
+      if (!this.settings.strict) {
+        target[property] = value;
+      }
 
-    if (entry.transform) {
-      value = entry.transform(value);
+      return true
     }
 
     trigger(target.onBeforeSet);
 
     if (updated) {
       trigger(target.onBeforeUpdate);
+    }
+
+    if (entry.transform) {
+      value = entry.transform(value);
     }
 
     if (this.settings.exceptions) {
@@ -244,45 +246,39 @@ Model.create = function (name, schema, prototype, settings = {}) {
     }
   } }[name];
 
-  SuperModel.checkErrors = function (payload, required) {
-    return Model.checkErrors(schema, payload, required)
+  SuperModel.checkErrors = function (payload, filters) {
+    const invalidations = {};
+
+    Object.keys(schema).forEach((property) => {
+      const value = payload[property];
+      const entry = schema[property];
+      let errors = checkErrors(entry, property, value);
+
+      if (errors.length) {
+        if (filters) {
+          errors = errors.filter((error) => !toArray(filters).includes(error.code));
+        }
+
+        if (errors.length) {
+          invalidations[property] = errors;
+        }
+      }
+    });
+
+    return Object.keys(invalidations).length ? invalidations : false
+  };
+
+  SuperModel.hydrate = function (payload) {
+    if (isArray(payload)) {
+      return payload.map((item) => new SuperModel(item))
+    }
+
+    return new SuperModel(payload)
   };
 
   Object.assign(SuperModel.prototype, prototype);
 
   return SuperModel
-};
-
-Model.checkErrors = function (schema, payload, filters) {
-  const invalidations = {};
-
-  Object.keys(schema).forEach((property) => {
-    const value = payload[property];
-    const entry = schema[property];
-    let errors = checkErrors(entry, property, value);
-
-    if (errors.length) {
-      if (filters) {
-        errors = errors.filter((error) => !toArray(filters).includes(error.code));
-      }
-
-      if (errors.length) {
-        invalidations[property] = errors;
-      }
-    }
-
-    return
-  });
-
-  return Object.keys(invalidations).length ? invalidations : false
-};
-
-Model.hydrate = function (ModelToHydrate, payload) {
-  if (isArray(payload)) {
-    return payload.map((item) => new ModelToHydrate(item))
-  }
-
-  return new ModelToHydrate(payload)
 };
 
 export default Model;
