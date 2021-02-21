@@ -1,10 +1,11 @@
 
-import { toArray, isArray, isUndef } from './utils.js'
-import checkErrors from './checkErrors.js'
 import SmartModelProxy from './SmartModelProxy.js'
+import createNested from './createNested.js'
+import checkErrors from './checkErrors.js'
+import { toArray, isArray, isUndef } from './utils.js'
 
 class SmartModel extends SmartModelProxy {
-  constructor(schema = {}, data = {}, settings = {}) {
+  constructor(schema = {}, data = {}, settings) {
     super(schema, settings)
 
     Object.keys(schema).forEach((key) => {
@@ -54,9 +55,20 @@ SmartModel.create = function (name, schema, settings, prototype) {
     const invalidations = {}
 
     Object.keys(schema).forEach((property) => {
-      let errors = checkErrors(schema[property], property, payload[property])
+      let subErrors
+      const value = payload[property]
+      const entry = schema[property]
+      const Nested = createNested(entry, property, settings)
 
-      if (errors.length) {
+      if (Nested) {
+        subErrors = Nested.checkErrors(value, filters)
+      }
+
+      let errors = checkErrors(entry, property, value)
+
+      if (subErrors) {
+        invalidations[property] = subErrors
+      } else if (errors.length) {
         if (filters) {
           errors = errors.filter((error) => !toArray(filters).includes(error.code))
         }
@@ -79,6 +91,8 @@ SmartModel.create = function (name, schema, settings, prototype) {
   }
 
   Object.assign(Model.prototype, prototype)
+
+  Model.schema = schema
 
   return Model
 }

@@ -12,6 +12,7 @@ Javascript object model.
 - [x] Value content validation (required, custom rules)
 - [x] Default value
 - [x] Virtual property
+- [x] Nested models
 - [x] Live cycle events
 - [ ] Proper documentation ^^
 

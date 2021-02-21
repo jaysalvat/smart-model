@@ -15,9 +15,9 @@ export default function test(expect, SmartModel) {
         const Model = SmartModel.create('Model', {})
         const model = new Model()
 
-        expect(Model).to. be.an.instanceOf(Function)
-        expect(model).to. be.an.instanceOf(SmartModel)
-        expect(model).to. be.an.instanceOf(Model)
+        expect(Model).to.be.an.instanceOf(Function)
+        expect(model).to.be.an.instanceOf(SmartModel)
+        expect(model).to.be.an.instanceOf(Model)
       })
 
       it('should populate with a schema', function () {
@@ -44,219 +44,170 @@ export default function test(expect, SmartModel) {
     // Required
 
     describe('Required', function () {
-      it('should throw an exception if a required prop is not set on init', function () {
-        let code, property
+      it('should throw an error if a required prop is not set on init', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true }
         })
 
-        try {
+        const err = checkExceptions(() => {
           new Model()
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        })
 
-        expect(property).to.be.equal('prop')
-        expect(code).to.be.equal('required')
+        expect(err.source).to.be.equal('Model')
+        expect(err.property).to.be.equal('prop')
+        expect(err.code).to.be.equal('required')
       })
 
-      it('should not throw an exception if a required prop is set on init', function () {
-        let code, property
+      it('should not throw an error  if a required prop is set on init', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true }
         })
 
-        try {
-          new Model({ prop: 'ok' })
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
-
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
-      })
-
-      it('should not throw an exception if a required prop is not set but have default value on init', function () {
-        let code, property
-        const Model = SmartModel.create('Model', {
-          prop: { required: true, default: 'ok' }
+        const err = checkExceptions(() => {
+          new Model({ prop: 'string' })
         })
 
-        try {
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
+      })
+
+      it('should not throw an error  if a required prop is not set but have default value on init', function () {
+        const Model = SmartModel.create('Model', {
+          prop: { required: true, default: 'string' }
+        })
+
+        const err = checkExceptions(() => {
           new Model()
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
-
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
-      })
-
-      it('should throw an exception if a required prop is set to empty', function () {
-        let code, property
-        const Model = SmartModel.create('Model', {
-          prop: { required: true, default: 'ok' }
         })
 
-        try {
-          const model = new Model()
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
+      })
 
+      it('should throw an error  if a required prop is set to empty', function () {
+
+        const Model = SmartModel.create('Model', {
+          prop: { required: true, default: 'string' }
+        })
+        const model = new Model()
+
+        const err = checkExceptions(() => {
           model.prop = null
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
-
-        expect(property).to.be.equal('prop')
-        expect(code).to.be.equal('required')
-      })
-
-      it('should throw an exception if a required prop is deleted', function () {
-        let code, property
-        const Model = SmartModel.create('Model', {
-          prop: { required: true, default: 'ok' }
         })
 
-        try {
-          const model = new Model()
+        expect(err.property).to.be.equal('prop')
+        expect(err.code).to.be.equal('required')
+      })
 
+      it('should throw an error  if a required prop is deleted', function () {
+
+        const Model = SmartModel.create('Model', {
+          prop: { required: true, default: 'string' }
+        })
+        const model = new Model()
+
+        const err = checkExceptions(() => {
           delete model.prop
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        })
 
-        expect(property).to.be.equal('prop')
-        expect(code).to.be.equal('required')
+        expect(err.property).to.be.equal('prop')
+        expect(err.code).to.be.equal('required')
       })
     })
 
     // Type
 
     describe('Type', function () {
-      it('should throw an exception if a typed prop is not set properly', function () {
-        let code, property
+      it('should throw an error  if a typed prop is not set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, type: String }
         })
 
-        try {
-          new Model({
-            prop: 0
-          })
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        const err = checkExceptions(() => {
+          new Model({ prop: 0 })
+        })
 
-        expect(property).to.be.equal('prop')
-        expect(code).to.be.equal('type')
+        expect(err.property).to.be.equal('prop')
+        expect(err.code).to.be.equal('type')
       })
 
-      it('should not throw an exception if a typed prop is set properly', function () {
-        let code, property
+      it('should not throw an error  if a typed prop is set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, type: String }
         })
 
-        try {
-          new Model({
-            prop: 'ok'
-          })
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
-
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
-      })
-
-      it('should not throw an exception if multiple typed props is set properly', function () {
-        let code, property
-        const Model = SmartModel.create('Model', {
-          prop: { required: true, type: [ String, Array ] }
+        const err = checkExceptions(() => {
+          new Model({ prop: 'string' })
         })
 
-        try {
-          const model = new Model({ prop: 'ok' })
-
-          model.prop = [ 'ok' ]
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
-
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an exception if a typed prop is set on a not required property', function () {
-        let code, property
+      it('should not throw an error  if multiple typed props is set properly', function () {
+        const Model = SmartModel.create('Model', {
+          prop: { type: [ String, Array ] }
+        })
+        const model = new Model()
+
+        const err = checkExceptions(() => {
+          model.prop = 'string'
+          model.prop = [ 'string' ]
+        })
+
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
+      })
+
+      it('should not throw an error  if a typed prop is set on a not required property', function () {
         const Model = SmartModel.create('Model', {
           prop: { type: String }
         })
 
-        try {
+        const err = checkExceptions(() => {
           new Model()
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        })
 
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
       })
     })
 
     // Rule
 
     describe('Rule', function () {
-      it('should throw an exception if a ruled prop is not set properly', function () {
-        let code, property
+      it('should throw an error  if a ruled prop is not set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, rule: {
             min: (value) => value < 5
           } }
         })
 
-        try {
-          new Model({
-            prop: 0
-          })
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        const err = checkExceptions(() => {
+          new Model({ prop: 0 })
+        })
 
-        expect(property).to.be.equal('prop')
-        expect(code).to.be.equal('min')
+        expect(err.property).to.be.equal('prop')
+        expect(err.code).to.be.equal('min')
       })
 
-      it('should not throw an exception if a ruled prop is set properly', function () {
-        let code, property
+      it('should not throw an error  if a ruled prop is set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, rule: {
             min: (value) => value < 5
           } }
         })
 
-        try {
+        const err = checkExceptions(() => {
           new Model({ prop: 10 })
-        } catch (e) {
-          property = e.property
-          code = e.code
-        }
+        })
 
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an exception if a ruled prop is set on an empty not required property', function () {
-        let code, property
+      it('should not throw an error  if a ruled prop is set on an empty not required property', function () {
+        let err = {}
         const Model = SmartModel.create('Model', {
           prop: { rule: {
             min: (value) => value < 5
@@ -266,12 +217,11 @@ export default function test(expect, SmartModel) {
         try {
           new Model()
         } catch (e) {
-          property = e.property
-          code = e.code
+          err = e
         }
 
-        expect(property).to.be.equal(undef)
-        expect(code).to.be.equal(undef)
+        expect(err.property).to.be.equal(undef)
+        expect(err.code).to.be.equal(undef)
       })
     })
 
@@ -283,9 +233,9 @@ export default function test(expect, SmartModel) {
           prop: { transform: (value) => 'transform: ' + value }
         })
 
-        const model = new Model({ prop: 'ok' })
+        const model = new Model({ prop: 'string' })
 
-        expect(model.prop).to.be.equal('transform: ok')
+        expect(model.prop).to.be.equal('transform: string')
       })
 
       it('should format a value', function () {
@@ -293,9 +243,9 @@ export default function test(expect, SmartModel) {
           prop: { format: (value) => 'format: ' + value }
         })
 
-        const model = new Model({ prop: 'ok' })
+        const model = new Model({ prop: 'string' })
 
-        expect(model.prop).to.be.equal('format: ok')
+        expect(model.prop).to.be.equal('format: string')
       })
 
       it('should transform and format a value', function () {
@@ -306,9 +256,9 @@ export default function test(expect, SmartModel) {
           }
         })
 
-        const model = new Model({ prop: 'ok' })
+        const model = new Model({ prop: 'string' })
 
-        expect(model.prop).to.be.equal('format: transform: ok')
+        expect(model.prop).to.be.equal('format: transform: string')
       })
     })
 
@@ -327,16 +277,18 @@ export default function test(expect, SmartModel) {
 
       it('should get a virtual property with context', function () {
         const Model = SmartModel.create('Model', {
-          prop1: { default: 'ok' },
+          prop1: { default: 'string' },
           prop2: (model) => 'virtual: ' + model.prop1
         })
 
         const model = new Model()
 
-        expect(model.prop1).to.be.equal('ok')
-        expect(model.prop2).to.be.equal('virtual: ok')
+        expect(model.prop1).to.be.equal('string')
+        expect(model.prop2).to.be.equal('virtual: string')
       })
     })
+
+    // Events
 
     describe('Events', function () {
       it('should trigger onBeforeDelete', testTrigger('onBeforeDelete'))
@@ -368,7 +320,7 @@ export default function test(expect, SmartModel) {
 
           const errrors = Model.checkErrors({
             prop2: 0,
-            prop3: 'ok',
+            prop3: 'string',
             prop4: -1
           })
 
@@ -410,8 +362,8 @@ export default function test(expect, SmartModel) {
           })
 
           const errrors = Model.checkErrors({
-            prop1: 'ok',
-            prop3: 'ok'
+            prop1: 'string',
+            prop3: 'string'
           })
 
           expect(errrors).to.be.equal(false)
@@ -421,7 +373,7 @@ export default function test(expect, SmartModel) {
       describe('Hydrate', function () {
         it('should hydrate a object', function () {
           const obj = {
-            prop1: 'ok'
+            prop1: 'string'
           }
 
           const Model = SmartModel.create('Model', {
@@ -431,15 +383,15 @@ export default function test(expect, SmartModel) {
 
           const model = Model.hydrate(obj)
 
-          expect(model.prop1).to.be.equal('format: ok')
+          expect(model.prop1).to.be.equal('format: string')
           expect(model.prop2).to.be.equal('default')
         })
 
         it('should hydrate an array of objects', function () {
           const objs = [
-            { prop1: 'ok 1' },
-            { prop1: 'ok 2' },
-            { prop1: 'ok 3' }
+            { prop1: 'string 1' },
+            { prop1: 'string 2' },
+            { prop1: 'string 3' }
           ]
 
           const Model = SmartModel.create('Model', {
@@ -450,7 +402,7 @@ export default function test(expect, SmartModel) {
           const models = Model.hydrate(objs)
 
           models.forEach((model, i) => {
-            expect(model.prop1).to.be.equal('format: ok ' + (i + 1))
+            expect(model.prop1).to.be.equal('format: string ' + (i + 1))
             expect(model.prop2).to.be.equal('default')
           })
         })
@@ -475,27 +427,27 @@ export default function test(expect, SmartModel) {
           })
 
           const model1 = new Model1({
-            prop1: 'ok',
-            prop2: 'ok'
+            prop1: 'string',
+            prop2: 'string'
           })
 
           const model2 = new Model2({
-            prop1: 'ok',
-            prop2: 'ok'
+            prop1: 'string',
+            prop2: 'string'
           })
 
           const model3 = new Model3({
-            prop1: 'ok',
-            prop2: 'ok'
+            prop1: 'string',
+            prop2: 'string'
           })
 
-          expect(model1.prop1).to.be.equal('ok')
+          expect(model1.prop1).to.be.equal('string')
           expect(model1.prop2).to.be.equal(undef)
 
-          expect(model2.prop1).to.be.equal('ok')
-          expect(model2.prop2).to.be.equal('ok')
+          expect(model2.prop1).to.be.equal('string')
+          expect(model2.prop2).to.be.equal('string')
 
-          expect(model3.prop1).to.be.equal('ok')
+          expect(model3.prop1).to.be.equal('string')
           expect(model3.prop2).to.be.equal(undef)
         })
 
@@ -508,11 +460,11 @@ export default function test(expect, SmartModel) {
             })
 
             const model = new Model({
-              prop1: 'ok',
-              prop2: 'ok'
+              prop1: 'string',
+              prop2: 'string'
             })
 
-            expect(model.prop1).to.be.equal('ok')
+            expect(model.prop1).to.be.equal('string')
             expect(model.prop2).to.be.equal(undef)
           })
 
@@ -524,17 +476,17 @@ export default function test(expect, SmartModel) {
             })
 
             const model = new Model({
-              prop1: 'ok',
-              prop2: 'ok'
+              prop1: 'string',
+              prop2: 'string'
             })
 
-            expect(model.prop1).to.be.equal('ok')
-            expect(model.prop2).to.be.equal('ok')
+            expect(model.prop1).to.be.equal('string')
+            expect(model.prop2).to.be.equal('string')
           })
         })
 
         describe('exceptions', function () {
-          it('should not throw exceptions if exceptions:false', function () {
+          it('should not throw errors if exceptions:false', function () {
             const Model = SmartModel.create('Model', {
               prop1: { required: true }
             }, {
@@ -546,7 +498,7 @@ export default function test(expect, SmartModel) {
             }).to.not.throw(Error)
           })
 
-          it('should throw exceptions if exceptions:true', function () {
+          it('should throw errors if exceptions:true', function () {
             const Model = SmartModel.create('Model', {
               prop1: { required: true }
             }, {
@@ -560,7 +512,169 @@ export default function test(expect, SmartModel) {
         })
       })
     })
+
+    // Nested models
+
+    describe('Nested model', function () {
+      it('should nest a child model with another model', function () {
+        const SubModel = SmartModel.create('SubModel', {
+          nestedProp: {
+            default: 'string2'
+          }
+        })
+
+        const Model = SmartModel.create('Model', {
+          prop1: { default: 'string1' },
+          prop2: { type: SubModel }
+        })
+
+        const model = new Model()
+
+        expect(model).to.be.an.instanceOf(SmartModel)
+        expect(model.prop1).to.be.equal('string1')
+        expect(model.prop2).to. be.an.instanceOf(SmartModel)
+        expect(model.prop2.nestedProp).to.be.equal('string2')
+      })
+
+      it('should nest a child model with schema', function () {
+        const Model = SmartModel.create('Model', {
+          prop1: {
+            default: 'string1'
+          },
+          prop2: {
+            type: {
+              nestedProp: {
+                default: 'string2'
+              }
+            }
+          }
+        })
+
+        const model = new Model()
+
+        expect(model.prop1).to.be.equal('string1')
+        expect(model.prop2).to.be.an.instanceOf(SmartModel)
+        expect(model.prop2.nestedProp).to.be.equal('string2')
+      })
+
+      it('should nest a child model in a child model with schema', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: {
+              nestedProp: {
+                type: {
+                  nestedNestedProp: {
+                    default: 'string'
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        const model = new Model()
+
+        expect(model).to.be.an.instanceOf(SmartModel)
+        expect(model.prop).to.be.an.instanceOf(SmartModel)
+        expect(model.prop.nestedProp).to.be.an.instanceOf(SmartModel)
+      })
+
+      it('should throw an error if a required parent prop is not set on init', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            required: true,
+            type: {
+              nestedProp: {
+                default: 'string'
+              }
+            }
+          }
+        })
+
+        const err = checkExceptions(() => {
+          new Model()
+        })
+
+        expect(err.property).to.be.equal('prop')
+        expect(err.source).to.be.equal('Model')
+        expect(err.code).to.be.equal('required')
+      })
+
+      it('should throw an error if a typed parent prop is not set properly', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: {
+              nestedProp: {}
+            }
+          }
+        })
+
+        const err = checkExceptions(() => {
+          new Model({ prop: 'string' })
+        })
+
+        expect(err.property).to.be.equal('prop')
+        expect(err.source).to.be.equal('Model')
+        expect(err.code).to.be.equal('type')
+      })
+
+      it('should throw an error if a required nested prop is not set on init', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: {
+              nestedProp: {
+                required: true
+              }
+            }
+          }
+        })
+
+        const err = checkExceptions(() => {
+          new Model({
+            prop: { nestedProp: null }
+          })
+        })
+
+        expect(err.property).to.be.equal('nestedProp')
+        expect(err.source).to.be.equal('Prop')
+        expect(err.code).to.be.equal('required')
+      })
+
+      it('should throw an error if a typed nested prop is not set properly', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: {
+              nestedProp: {
+                type: String
+              }
+            }
+          }
+        })
+
+        const err = checkExceptions(() => {
+          const model = new Model()
+
+          model.prop.nestedProp = 0
+        })
+
+        expect(err.property).to.be.equal('nestedProp')
+        expect(err.source).to.be.equal('Prop')
+        expect(err.code).to.be.equal('type')
+      })
+    })
   })
+
+  function checkExceptions(fn) {
+    let err = {}
+
+    try {
+      fn()
+    } catch (e) {
+      err = e
+    }
+
+    return err
+  }
 
   function testTrigger(name) {
     return function () {

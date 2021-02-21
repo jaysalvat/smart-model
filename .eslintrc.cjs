@@ -11,6 +11,7 @@ module.exports = {
     '@jaysalvat/eslint-config'
   ],
   rules: {
-    'newline-before-return': 2
+    'newline-before-return': 2,
+    'no-empty': [ 2, { allowEmptyCatch: true } ]
   }
 }

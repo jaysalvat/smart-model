@@ -1,26 +1,27 @@
-import { clone, isFn, isEqual } from './utils.js'
-import checkErrors from './checkErrors.js'
 import SmartModelError from './SmartModelError.js'
+import checkErrors from './checkErrors.js'
+import createNested from './createNested.js'
+import { isFn, isEqual } from './utils.js'
 
 class SmartModelProxy {
-  constructor(schema = {}, settings = {}) {
+  constructor(schema, settings) {
     return new Proxy(this, {
 
       set(target, property, value) {
-        const oldValue = clone(target[property])
-        const updated = !isEqual(value, oldValue)
-        const entry = schema[property]
+        let entry = schema[property]
+        const old = target[property]
+        const updated = !isEqual(value, old)
+        const Nested = createNested(entry, property, settings)
 
         function trigger(method, args) {
-          return Reflect.apply(method, target, args ? args : [ property, value, oldValue, schema ])
+          return Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
         }
 
         if (!entry) {
-          if (!settings.strict) {
-            target[property] = value
+          if (settings.strict) {
+            return true
           }
-
-          return true
+          entry = {}
         }
 
         trigger(target.onBeforeSet)
@@ -29,7 +30,7 @@ class SmartModelProxy {
           trigger(target.onBeforeUpdate)
         }
 
-        if (entry.transform) {
+        if (isFn(entry.transform)) {
           value = trigger(entry.transform, [ value, schema ])
         }
 
@@ -37,14 +38,17 @@ class SmartModelProxy {
           const errors = checkErrors(entry, property, value)
 
           if (errors.length) {
-            errors.forEach((error) => {
-              throw new SmartModelError({
-                message: error.message,
-                property: property,
-                code: error.code
-              })
+            throw new SmartModelError({
+              message: errors[0].message,
+              property: property,
+              code: errors[0].code,
+              source: target.constructor.name
             })
           }
+        }
+
+        if (Nested) {
+          value = new Nested(value instanceof Object ? value : {})
         }
 
         target[property] = value
@@ -86,7 +90,7 @@ class SmartModelProxy {
       },
 
       deleteProperty(target, property) {
-        const value = clone(target[property])
+        const value = target[property]
         const entry = schema[property]
 
         function trigger(method, args) {
