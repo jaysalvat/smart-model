@@ -3,7 +3,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.12 built 2021-02-19 22:01:31
+* @version 0.2.13 built 2021-02-21 11:54:48
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -12,6 +12,19 @@
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.SmartModel = {}));
 }(this, (function (exports) { 'use strict';
+
+  class SmartModelError extends Error {
+    constructor(data) {
+      super(data.message);
+      Object.assign(this, data);
+    }
+  }
+
+  /* eslint-disable new-cap */
+
+  function isArray(value) {
+    return Array.isArray(value)
+  }
 
   function isUndef(value) {
     return typeof value === 'undefined'
@@ -25,24 +38,45 @@
     return typeof value === 'function'
   }
 
-  function isArray(value) {
-    return Array.isArray(value)
-  }
-
   function isEqual(value1, value2) {
     return JSON.stringify(value1) === JSON.stringify(value2)
   }
 
-  function clone(value) {
-    return value ? JSON.parse(JSON.stringify(value)) : value
+  function isClass(value) {
+    return value.toString().startsWith('class')
+  }
+
+  function isType(value, Type) {
+    if (typeof Type === 'object') {
+      Type = Object;
+    }
+
+    if (!isClass(Type) && typeof value === typeof Type()) {
+      return true
+    }
+
+    // if (isClass(Type) && typeof value === typeof new Type({}, { exceptions: false })) {
+    //   return true
+    // }
+
+    if (value instanceof Type || typeof value === typeof Type) {
+      return true
+    }
+
+    return false
   }
 
   function toArray(value) {
     return [].concat([], value)
   }
 
-  function isType(value, type) {
-    return typeof value === typeof type() || value instanceof type
+  function pascalCase(string) {
+    return string
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .match(/[a-z]+/gi)
+      .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+      .join('')
   }
 
   function checkErrors(entry, property, value) {
@@ -86,32 +120,40 @@
     return errors
   }
 
-  class SmartModelError extends Error {
-    constructor(data) {
-      super(data.message);
-      Object.assign(this, data);
+  function createNested(entry = {}, property, settings) {
+    if (!entry.type) {
+      return false
     }
+
+    const Child = entry.type.prototype instanceof SmartModel ? entry.type : false;
+    const schema = typeof entry.type === 'object' ? entry.type : false;
+
+    if (Child || schema) {
+      return Child ? Child : SmartModel.create(pascalCase(property), schema, settings)
+    }
+
+    return false
   }
 
   class SmartModelProxy {
-    constructor(schema = {}, settings = {}) {
+    constructor(schema, settings) {
       return new Proxy(this, {
 
         set(target, property, value) {
-          const oldValue = clone(target[property]);
-          const updated = !isEqual(value, oldValue);
-          const entry = schema[property];
+          let entry = schema[property];
+          const old = target[property];
+          const updated = !isEqual(value, old);
+          const Nested = createNested(entry, property, settings);
 
           function trigger(method, args) {
-            return Reflect.apply(method, target, args ? args : [ property, value, oldValue, schema ])
+            return Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
           }
 
           if (!entry) {
-            if (!settings.strict) {
-              target[property] = value;
+            if (settings.strict) {
+              return true
             }
-
-            return true
+            entry = {};
           }
 
           trigger(target.onBeforeSet);
@@ -120,7 +162,7 @@
             trigger(target.onBeforeUpdate);
           }
 
-          if (entry.transform) {
+          if (isFn(entry.transform)) {
             value = trigger(entry.transform, [ value, schema ]);
           }
 
@@ -128,14 +170,17 @@
             const errors = checkErrors(entry, property, value);
 
             if (errors.length) {
-              errors.forEach((error) => {
-                throw new SmartModelError({
-                  message: error.message,
-                  property: property,
-                  code: error.code
-                })
-              });
+              throw new SmartModelError({
+                message: errors[0].message,
+                property: property,
+                code: errors[0].code,
+                source: target.constructor.name
+              })
             }
+          }
+
+          if (Nested) {
+            value = new Nested(value instanceof Object ? value : {});
           }
 
           target[property] = value;
@@ -177,7 +222,7 @@
         },
 
         deleteProperty(target, property) {
-          const value = clone(target[property]);
+          const value = target[property];
           const entry = schema[property];
 
           function trigger(method, args) {
@@ -206,7 +251,7 @@
   }
 
   class SmartModel extends SmartModelProxy {
-    constructor(schema = {}, data = {}, settings = {}) {
+    constructor(schema = {}, data = {}, settings) {
       super(schema, settings);
 
       Object.keys(schema).forEach((key) => {
@@ -256,9 +301,20 @@
       const invalidations = {};
 
       Object.keys(schema).forEach((property) => {
-        let errors = checkErrors(schema[property], property, payload[property]);
+        let subErrors;
+        const value = payload[property];
+        const entry = schema[property];
+        const Nested = createNested(entry, property, settings);
 
-        if (errors.length) {
+        if (Nested) {
+          subErrors = Nested.checkErrors(value, filters);
+        }
+
+        let errors = checkErrors(entry, property, value);
+
+        if (subErrors) {
+          invalidations[property] = subErrors;
+        } else if (errors.length) {
           if (filters) {
             errors = errors.filter((error) => !toArray(filters).includes(error.code));
           }
@@ -281,6 +337,8 @@
     };
 
     Object.assign(Model.prototype, prototype);
+
+    Model.schema = schema;
 
     return Model
   };
