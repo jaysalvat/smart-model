@@ -3,7 +3,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.2.13 built 2021-02-21 11:54:48
+* @version 0.2.14 built 2021-02-21 15:21:56
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -46,20 +46,30 @@
     return value.toString().startsWith('class')
   }
 
-  function isType(value, Type) {
-    if (typeof Type === 'object') {
-      Type = Object;
-    }
+  function isPlainObject(value) {
+    return value.toString() === '[object Object]'
+  }
 
-    if (!isClass(Type) && typeof value === typeof Type()) {
+  function isType(value, Type) {
+    const match = Type && Type.toString().match(/^\s*function (\w+)/);
+    const type = (match ? match[1] : 'object').toLowerCase();
+
+    if (type === 'date' && value instanceof Type) {
       return true
     }
 
-    // if (isClass(Type) && typeof value === typeof new Type({}, { exceptions: false })) {
-    //   return true
-    // }
+    if (type === 'array' && isArray(value)) {
+      return true
+    }
 
-    if (value instanceof Type || typeof value === typeof Type) {
+    if (type === 'object') {
+      if (isClass(Type) && value instanceof Type) {
+        return true
+      }
+      if (!isClass(Type) && typeof value === type) {
+        return true
+      }
+    } else if (typeof value === type) {
       return true
     }
 
@@ -126,7 +136,7 @@
     }
 
     const Child = entry.type.prototype instanceof SmartModel ? entry.type : false;
-    const schema = typeof entry.type === 'object' ? entry.type : false;
+    const schema = isPlainObject(entry.type) ? entry.type : false;
 
     if (Child || schema) {
       return Child ? Child : SmartModel.create(pascalCase(property), schema, settings)
@@ -256,7 +266,7 @@
 
       Object.keys(schema).forEach((key) => {
         if (isUndef(data[key])) {
-          if (schema[key].default) {
+          if (!isUndef(schema[key].default)) {
             this[key] = schema[key].default;
           } else {
             this[key] = data[key];
