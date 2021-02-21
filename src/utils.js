@@ -24,20 +24,30 @@ export function isClass(value) {
   return value.toString().startsWith('class')
 }
 
-export function isType(value, Type) {
-  if (typeof Type === 'object') {
-    Type = Object
-  }
+export function isPlainObject(value) {
+  return value.toString() === '[object Object]'
+}
 
-  if (!isClass(Type) && typeof value === typeof Type()) {
+export function isType(value, Type) {
+  const match = Type && Type.toString().match(/^\s*function (\w+)/)
+  const type = (match ? match[1] : 'object').toLowerCase()
+
+  if (type === 'date' && value instanceof Type) {
     return true
   }
 
-  // if (isClass(Type) && typeof value === typeof new Type({}, { exceptions: false })) {
-  //   return true
-  // }
+  if (type === 'array' && isArray(value)) {
+    return true
+  }
 
-  if (value instanceof Type || typeof value === typeof Type) {
+  if (type === 'object') {
+    if (isClass(Type) && value instanceof Type) {
+      return true
+    }
+    if (!isClass(Type) && typeof value === type) {
+      return true
+    }
+  } else if (typeof value === type) {
     return true
   }
 

@@ -58,7 +58,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal('required')
       })
 
-      it('should not throw an error  if a required prop is set on init', function () {
+      it('should not throw an error if a required prop is set on init', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true }
         })
@@ -71,7 +71,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an error  if a required prop is not set but have default value on init', function () {
+      it('should not throw an error if a required prop is not set but have default value on init', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, default: 'string' }
         })
@@ -84,8 +84,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal(undef)
       })
 
-      it('should throw an error  if a required prop is set to empty', function () {
-
+      it('should throw an error if a required prop is set to empty', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, default: 'string' }
         })
@@ -99,8 +98,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal('required')
       })
 
-      it('should throw an error  if a required prop is deleted', function () {
-
+      it('should throw an error if a required prop is deleted', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, default: 'string' }
         })
@@ -118,7 +116,7 @@ export default function test(expect, SmartModel) {
     // Type
 
     describe('Type', function () {
-      it('should throw an error  if a typed prop is not set properly', function () {
+      it('should throw an error if a typed prop is not set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, type: String }
         })
@@ -131,7 +129,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal('type')
       })
 
-      it('should not throw an error  if a typed prop is set properly', function () {
+      it('should not throw an error if a typed prop is set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, type: String }
         })
@@ -144,7 +142,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an error  if multiple typed props is set properly', function () {
+      it('should not throw an error if multiple typed props is set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { type: [ String, Array ] }
         })
@@ -159,7 +157,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an error  if a typed prop is set on a not required property', function () {
+      it('should not throw an error if a typed prop is set on a not required property', function () {
         const Model = SmartModel.create('Model', {
           prop: { type: String }
         })
@@ -171,12 +169,47 @@ export default function test(expect, SmartModel) {
         expect(err.property).to.be.equal(undef)
         expect(err.code).to.be.equal(undef)
       })
+
+      it('should be alright with all those type checks', function () {
+        const TestModel = SmartModel.create('Test', {})
+        const testModel = new TestModel()
+
+        const types = [
+          { type: Date, fail: 100, success: new Date() },
+          { type: Array, fail: {}, success: [] },
+          { type: String, fail: 0, success: 'string' },
+          { type: Object, fail: 'string', success: {} },
+          { type: Number, fail: 'string', success: 100 },
+          { type: Boolean, fail: 'string', success: true },
+          { type: Function, fail: 'string', success: function () { } },
+          { type: SmartModel, fail: {}, success: testModel },
+          { type: TestModel, fail: 'string', success: testModel }
+        ]
+
+        types.forEach((type) => {
+          expect(() => {
+            const Model = SmartModel.create('Model', {
+              prop: { type: type.type, default: type.fail }
+            })
+
+            new Model()
+          }).to.throw('type')
+
+          expect(() => {
+            const Model = SmartModel.create('Model', {
+              prop: { type: type.type, default: type.success }
+            })
+
+            new Model()
+          }).to.not.throw('type')
+        })
+      })
     })
 
-    // Rule
+    // // Rule
 
     describe('Rule', function () {
-      it('should throw an error  if a ruled prop is not set properly', function () {
+      it('should throw an error if a ruled prop is not set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, rule: {
             min: (value) => value < 5
@@ -191,7 +224,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal('min')
       })
 
-      it('should not throw an error  if a ruled prop is set properly', function () {
+      it('should not throw an error if a ruled prop is set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: { required: true, rule: {
             min: (value) => value < 5
@@ -206,7 +239,7 @@ export default function test(expect, SmartModel) {
         expect(err.code).to.be.equal(undef)
       })
 
-      it('should not throw an error  if a ruled prop is set on an empty not required property', function () {
+      it('should not throw an error if a ruled prop is set on an empty not required property', function () {
         let err = {}
         const Model = SmartModel.create('Model', {
           prop: { rule: {
