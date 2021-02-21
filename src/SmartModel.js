@@ -10,7 +10,7 @@ class SmartModel extends SmartModelProxy {
 
     Object.keys(schema).forEach((key) => {
       if (isUndef(data[key])) {
-        if (schema[key].default) {
+        if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default
         } else {
           this[key] = data[key]
