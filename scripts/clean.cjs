@@ -2,6 +2,5 @@ const sh = require('./shared.cjs')
 
 const root = __dirname + '/../'
 
-sh.info('Clean build dir')
-sh.rm('-rf', root + 'build')
-
+sh.info('Clean build dir ' + root + 'build')
+sh.rm(root + 'build')
