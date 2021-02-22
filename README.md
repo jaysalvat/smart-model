@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model.svg)](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model)
 
-Model
-=============
+SmartModel
+==========
 
 Javascript object model.
 
