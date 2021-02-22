@@ -240,18 +240,15 @@ export default function test(expect, SmartModel) {
       })
 
       it('should not throw an error if a ruled prop is set on an empty not required property', function () {
-        let err = {}
         const Model = SmartModel.create('Model', {
           prop: { rule: {
             min: (value) => value < 5
           } }
         })
 
-        try {
+        const err = checkExceptions(() => {
           new Model()
-        } catch (e) {
-          err = e
-        }
+        })
 
         expect(err.property).to.be.equal(undef)
         expect(err.code).to.be.equal(undef)
@@ -295,7 +292,7 @@ export default function test(expect, SmartModel) {
       })
     })
 
-    // Virtual property
+    // Virtual / Readonly property
 
     describe('Virtual property', function () {
       it('should get a virtual property', function () {
@@ -318,6 +315,21 @@ export default function test(expect, SmartModel) {
 
         expect(model.prop1).to.be.equal('string')
         expect(model.prop2).to.be.equal('virtual: string')
+      })
+
+      it('should throw an exception if property is readonly', function () {
+        const Model = SmartModel.create('Model', {
+          prop: { default: 'string', readonly: true }
+        })
+
+        const model = new Model()
+
+        const err = checkExceptions(() => {
+          model.prop = 'another string'
+        })
+
+        expect(err.code).to.be.equal('readonly')
+        expect(err.property).to.be.equal('prop')
       })
     })
 
@@ -400,6 +412,18 @@ export default function test(expect, SmartModel) {
           })
 
           expect(errrors).to.be.equal(false)
+        })
+
+        it('should return an array of model errors with readonly error', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { type: String, readonly: true }
+          })
+
+          const errrors = Model.checkErrors({
+            prop: 'string'
+          })
+
+          expect(errrors.prop[0].code).to.be.equal('readonly')
         })
       })
 

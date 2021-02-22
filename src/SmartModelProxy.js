@@ -1,7 +1,7 @@
 import SmartModelError from './SmartModelError.js'
 import checkErrors from './checkErrors.js'
 import createNested from './createNested.js'
-import { isFn, isEqual } from './utils.js'
+import { isFn, isEqual, isUndef } from './utils.js'
 
 class SmartModelProxy {
   constructor(schema, settings) {
@@ -10,7 +10,8 @@ class SmartModelProxy {
       set(target, property, value) {
         let entry = schema[property]
         const old = target[property]
-        const updated = !isEqual(value, old)
+        const first = isUndef(old)
+        const updated = !first && !isEqual(value, old)
         const Nested = createNested(entry, property, settings)
 
         function trigger(method, args) {
@@ -35,7 +36,7 @@ class SmartModelProxy {
         }
 
         if (settings.exceptions) {
-          const errors = checkErrors(entry, property, value)
+          const errors = checkErrors(entry, property, value, first)
 
           if (errors.length) {
             throw new SmartModelError({

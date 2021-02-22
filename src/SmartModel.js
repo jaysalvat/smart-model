@@ -64,7 +64,7 @@ SmartModel.create = function (name, schema, settings, prototype) {
         subErrors = Nested.checkErrors(value, filters)
       }
 
-      let errors = checkErrors(entry, property, value)
+      let errors = checkErrors(entry, property, value, false)
 
       if (subErrors) {
         invalidations[property] = subErrors

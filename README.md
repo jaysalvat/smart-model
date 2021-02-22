@@ -11,6 +11,7 @@ Javascript object model.
 - [x] Value type validation
 - [x] Value content validation (required, custom rules)
 - [x] Default value
+- [x] Readonly properties
 - [x] Virtual property
 - [x] Throw exception (or not) if invalid
 - [x] Nested models

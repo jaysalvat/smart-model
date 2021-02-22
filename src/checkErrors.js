@@ -1,12 +1,21 @@
 import { isEmpty, toArray, isType } from './utils.js'
 
-export default function checkErrors(entry, property, value) {
+export default function checkErrors(entry, property, value, first) {
   const errors = []
 
   if (entry.required && isEmpty(value)) {
     errors.push({
-      message: `Invalid value 'required' on property '${property}'`,
+      message: `Property "${property}" is "required"`,
       code: 'required'
+    })
+
+    return errors
+  }
+
+  if (entry.readonly && !first) {
+    errors.push({
+      message: `Property '${property}' is 'readonly'`,
+      code: 'readonly'
     })
 
     return errors
@@ -19,7 +28,7 @@ export default function checkErrors(entry, property, value) {
   if (entry.type && (entry.required || !isEmpty(value))) {
     if (!toArray(entry.type).some((type) => isType(value, type))) {
       errors.push({
-        message: `Invalid type '${typeof value}' on property '${property}'`,
+        message: `Property "${property}" has an invalid type "${typeof value}"`,
         code: 'type'
       })
     }
@@ -31,7 +40,7 @@ export default function checkErrors(entry, property, value) {
 
       if (rule(value)) {
         errors.push({
-          message: `Invalid value '${key}' on property '${property}'`,
+          message: `Property "${property}" breaks the "${key}" rule`,
           code: key
         })
       }
