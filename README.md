@@ -12,12 +12,13 @@ Javascript object model.
 - [x] Value content validation (required, custom rules)
 - [x] Default value
 - [x] Virtual property
+- [x] Throw exception (or not) if invalid
 - [x] Nested models
 - [x] Live cycle events
 - [ ] Proper documentation ^^
 
-Works on modern browser. [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html)
-on your browser.
+Works on modern browsers. 
+[Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html) on your browser.
 
 ## Install
 
