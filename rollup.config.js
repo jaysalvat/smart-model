@@ -10,7 +10,7 @@ const DIST = './build'
 const DATE = new Date().toISOString().replace(/[TZ]/g, ' ').split('.')[0]
 
 const configs = []
-const formats = [ 'esm', 'esm.min', 'umd', 'umd.min' ]
+const formats = [ 'iife', 'iife.min', 'esm', 'esm.min', 'cjs', 'cjs.min', 'umd', 'umd.min', 'umd.min' ]
 const mutedWarnings = [ 'CIRCULAR_DEPENDENCY' ]
 const watched = process.env.ROLLUP_WATCH
 
@@ -50,15 +50,15 @@ const terserMinify = {
 
 formats.forEach((type) => {
   const [ format, minify ] = type.split('.')
-  const filename = FILENAME + '.' + format + (minify ? '.min' : '') + '.js'
+  const filename = FILENAME + (format === 'iife' ? '' : '.' + format) + (minify ? '.min' : '') + '.js'
 
   configs.push({
     input: SRC + '/index.js',
     output: {
-      exports: 'named',
       format: format,
       file: DIST + '/' + filename,
-      name: format === 'umd' ? NAME : null,
+      name: NAME,
+      exports: 'default',
       banner: !watched && (minify ? bannerMinify : bannerBeautify),
       plugins: [
         !watched && terser(minify ? terserMinify : terserBeautify),

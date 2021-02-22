@@ -6,6 +6,8 @@
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
+"use strict";
+
 class SmartModelError extends Error {
   constructor(data) {
     super(data.message);
@@ -283,4 +285,4 @@ SmartModel.create = function(name, schema, settings, prototype) {
   return Model;
 };
 
-export default SmartModel;
+module.exports = SmartModel;

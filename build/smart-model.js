@@ -6,10 +6,7 @@
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
-(function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, 
-  global.SmartModel = factory());
-})(this, (function() {
+var SmartModel = function() {
   "use strict";
   class SmartModelError extends Error {
     constructor(data) {
@@ -272,4 +269,4 @@
     return Model;
   };
   return SmartModel;
-}));
+}();

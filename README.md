@@ -38,10 +38,10 @@ import SmartModel from '@jaysalvat/smart-model'
 import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/smart-model.esm.min.js'
 ```
 
-### CDN
+### The old way
 
 ```html
-<script src="https://unpkg.com/@jaysalvat/smart-model@latest/build/smart-model.umd.min.js"></script>
+<script src="https://unpkg.com/@jaysalvat/smart-model@latest/build/smart-model.min.js"></script>
 ```
 
 ## Usage
@@ -49,8 +49,7 @@ import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/sm
 Better documentation soon...
 
 ```javascript
-import SmartModel from '@jaysalvat/smart-model'
-import readingTime from 'reading-time';
+function readingtime(text) { /*...*/ }
 
 const Post = SmartModel.create('Post', {
     title: {
@@ -148,15 +147,27 @@ npm run test
 ```
 
 ```sh
-npm run test:browser
+npm run test:watch
 ```
 
+```sh
+npm run test:browser
+```
 
 Bump version and publish to NPM
 
 ```sh
 npm run release
+```
+
+```sh
 npm run release:patch
+```
+
+```sh
 npm run release:minor
+```
+
+```sh
 npm run release:major
 ```
