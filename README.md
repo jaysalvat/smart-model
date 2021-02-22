@@ -111,8 +111,12 @@ const Post = SmartModel.create('Post', {
 
 ```javascript
 const post = new Post({
-  title: 'my new post',
-  body: 'lorem ipsum...'
+  title: 'My new post',
+  body: 'Lorem ipsum...',
+  author: {
+    firstname: 'Brad',
+    lastname: 'Pitt'
+  }
 })
 ```
 
