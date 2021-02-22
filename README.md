@@ -22,6 +22,8 @@ Works on modern browsers.
 
 ## Install
 
+[Provided formats](https://github.com/jaysalvat/smart-model/tree/master/build) are IFFE, ESM, CJS and UMD, all minified.
+
 ### NPM
 
 ```sh
