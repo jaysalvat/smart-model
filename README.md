@@ -16,6 +16,9 @@ Javascript object model.
 - [x] Live cycle events
 - [ ] Proper documentation ^^
 
+Works on modern browser. [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html)
+on your browser.
+
 ## Install
 
 Install npm package
