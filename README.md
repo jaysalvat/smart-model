@@ -132,6 +132,159 @@ const post = new Post({
 })
 ```
 
+## Documentation
+
+### Schema
+
+Options for property:
+
+| Option      | Type    | Description 
+| ----------- | ------- | ---
+| type        | any     | The required type (*) of a value. You can set a schema or another model (*) in order to nest models 
+| required    | bool    | The value is required. See `settings.empty` for the empty check function
+| readonly    | bool    | The value can't be overwritten
+| default     | any     | The default value if the property is undefined
+| transform   | fn      | A function to transform the value to set
+| format      | fn      | A function to format the value to get
+| rule        | object  | An object which contains the validation rules (**)
+
+#### [*] Type
+
+Type can be `String`, `Boolean`, `Number`,  `Date`, `Function` or a class.
+If a schema is set as a type, a nested model will be created.
+
+```javascript
+const Post = SmartModel.create('Post', {
+  title: { 
+    type: String 
+  },
+  body: { 
+    type: String 
+  },
+  Date: { 
+    type: Date 
+  },
+  author: {
+    type {
+      firstname: {
+        type: String
+      },
+      lastnaame: {
+        type: String
+      }
+    }
+  }
+})
+```
+
+An existing Model can be set as a type in order to nest this Model.
+
+```javascript
+const Author = SmartModel.create('Author', {
+  firstname: {
+    type: String
+  },
+  lastnaame: {
+    type: String
+  }
+})
+
+const Post = SmartModel.create('Post', {
+  title: { 
+    type: String 
+  },
+  body: { 
+    type: String 
+  },
+  Date: { 
+    type: Date 
+  },
+  body: { 
+    type: string 
+  },
+  author: {
+    type: Author
+  }
+})
+```
+
+#### [**]s Rule
+
+Multiple rules of validation can be set on a property.
+
+```javascript
+const Discount = SmartModel.create('Discount', {
+  percent: {
+    type: Number,
+    rule: {
+      'min': {value) => value < 0,
+      'max': {value) => value > 100
+    }
+  }
+})
+```
+
+### Settings
+
+| Option      | Type        | Default       | Description
+| ----------- | ----------- | ------------- | ---
+| strict      | bool        | false         | Allow to set property not present in the schema
+| empty       | fn          | fn (***)      | Function to check if a value is empty if required
+| exceptions  | bool/object | object (****) | Throw exceptions on errors. can be `boolean` or òbject` for advanced settings
+
+#### [***] Empty check function 
+
+The default function to check if a value is empty is:
+
+```javascript
+(value) => value === '' || value === null || value === undefined
+```
+
+#### [****] Exceptions object
+
+| Option    | Type | Default 
+| --------- | ---- | -------
+| readonly  | bool | false
+| required  | bool | true
+| rule      | bool | true
+| strict    | bool | false
+| type      | bool | true
+
+### Methods and callbacks
+
+Methods can be added to models.
+
+```javascript
+const Article = SmartModel.create('Article', {
+  body: {
+    type: String
+  }
+}, {}, {
+  excerpt(limit = 10) {
+    return this.body.substr(0, limit) + '…'
+  }
+})
+```
+
+Models have some callbacks methods that are called when properties are set, get, updated or deleted.
+
+```javascript
+const User = SmartModel.create('User', {
+  username: {
+    type: String
+  }
+}, {}, {
+  onBeforeGet() {}
+  onBeforeSet() {}
+  onBeforeUpdate() {}
+  onDelete() {}
+  onGet() {}
+  onBeforeDelete() {}
+  onSet() {}
+  onUpdate() {}
+})
+```
+
 ## Dev
 
 Dev mode
