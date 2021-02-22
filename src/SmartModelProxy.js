@@ -8,7 +8,7 @@ class SmartModelProxy {
     return new Proxy(this, {
 
       set(target, property, value) {
-        let entry = schema[property]
+        const entry = schema[property] || {}
         const old = target[property]
         const first = isUndef(old)
         const updated = !first && !isEqual(value, old)
@@ -16,13 +16,6 @@ class SmartModelProxy {
 
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
-        }
-
-        if (!entry) {
-          if (settings.strict) {
-            return true
-          }
-          entry = {}
         }
 
         trigger(target.onBeforeSet)
@@ -36,16 +29,15 @@ class SmartModelProxy {
         }
 
         if (settings.exceptions) {
-          const errors = checkErrors(entry, property, value, first)
+          const errors = checkErrors(entry, property, value, first, settings)
 
           if (errors.length) {
-            throw new SmartModelError({
-              message: errors[0].message,
-              property: property,
-              code: errors[0].code,
-              source: target.constructor.name
-            })
+            SmartModelError.throw(settings, errors[0].code, errors[0].message, property, target)
           }
+        }
+
+        if (settings.strict && !Object.keys(entry).length) {
+          return true
         }
 
         if (Nested) {

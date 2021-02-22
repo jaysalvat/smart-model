@@ -2,7 +2,7 @@
 import SmartModelProxy from './SmartModelProxy.js'
 import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
-import { toArray, isArray, isUndef } from './utils.js'
+import { merge, toArray, isArray, isUndef } from './utils.js'
 
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
@@ -39,11 +39,17 @@ class SmartModel extends SmartModelProxy {
 
 SmartModel.settings = {
   strict: false,
-  exceptions: true
+  exceptions: {
+    readonly: false,
+    required: true,
+    rule: true,
+    strict: false,
+    type: true
+  }
 }
 
 SmartModel.create = function (name, schema, settings, prototype) {
-  settings = Object.assign({}, SmartModel.settings, settings)
+  settings = merge(SmartModel.settings, settings)
 
   const Model = { [name]: class extends SmartModel {
     constructor(data) {
@@ -64,7 +70,7 @@ SmartModel.create = function (name, schema, settings, prototype) {
         subErrors = Nested.checkErrors(value, filters)
       }
 
-      let errors = checkErrors(entry, property, value, false)
+      let errors = checkErrors(entry, property, value, false, settings)
 
       if (subErrors) {
         invalidations[property] = subErrors

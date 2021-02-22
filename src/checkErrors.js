@@ -1,7 +1,14 @@
 import { isEmpty, toArray, isType } from './utils.js'
 
-export default function checkErrors(entry, property, value, first) {
+export default function checkErrors(entry, property, value, first, settings) {
   const errors = []
+
+  if (settings.strict && (!entry || !Object.keys(entry).length)) {
+    errors.push({
+      message: `Property "${property}" can't be set in strict mode`,
+      code: 'strict'
+    })
+  }
 
   if (entry.required && isEmpty(value)) {
     errors.push({
@@ -41,7 +48,7 @@ export default function checkErrors(entry, property, value, first) {
       if (rule(value)) {
         errors.push({
           message: `Property "${property}" breaks the "${key}" rule`,
-          code: key
+          code: 'rule:' + key
         })
       }
     })

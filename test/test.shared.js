@@ -31,12 +31,12 @@ export default function test(expect, SmartModel) {
 
       it('should add default values', function () {
         const Model = SmartModel.create('Model', {
-          prop1: { default: 'Default prop1' },
+          prop1: { default: 'Default value1' },
           prop2: { }
         })
         const model = new Model()
 
-        expect(model.prop1).to.be.equal('Default prop1')
+        expect(model.prop1).to.be.equal('Default value1')
         expect(model.prop2).to.be.equal(undef)
       })
     })
@@ -227,7 +227,7 @@ export default function test(expect, SmartModel) {
           })
 
           expect(err.property).to.be.equal('prop')
-          expect(err.code).to.be.equal('min')
+          expect(err.code).to.be.equal('rule:min')
         })
 
         it('should not throw an error if a ruled prop is set properly', function () {
@@ -264,7 +264,6 @@ export default function test(expect, SmartModel) {
           expect(err.code).to.be.equal(undef)
         })
       })
-
     })
 
     // Format / Transfor
@@ -330,6 +329,8 @@ export default function test(expect, SmartModel) {
       })
 
       it('should throw an exception if property is readonly', function () {
+        SmartModel.settings.exceptions.readonly = true
+
         const Model = SmartModel.create('Model', {
           prop: { default: 'string', readonly: true }
         })
@@ -386,8 +387,8 @@ export default function test(expect, SmartModel) {
           expect(errorProperties.length).to.be.equal(3)
           expect(errrors.prop1[0].code).to.be.equal('required')
           expect(errrors.prop2[0].code).to.be.equal('type')
-          expect(errrors.prop4[0].code).to.be.equal('min')
-          expect(errrors.prop4[1].code).to.be.equal('pos')
+          expect(errrors.prop4[0].code).to.be.equal('rule:min')
+          expect(errrors.prop4[1].code).to.be.equal('rule:pos')
         })
 
         it('should return an array of model errors without type', function () {
@@ -482,6 +483,7 @@ export default function test(expect, SmartModel) {
       describe('Settings', function () {
         it('should set settings for all instances', function () {
           SmartModel.settings.strict = true
+          SmartModel.settings.exceptions.strict = false
 
           const Model1 = SmartModel.create('Model1', {
             prop1: { type: String }
@@ -557,7 +559,7 @@ export default function test(expect, SmartModel) {
         describe('exceptions', function () {
           it('should not throw errors if exceptions:false', function () {
             const Model = SmartModel.create('Model', {
-              prop1: { required: true }
+              prop: { required: true }
             }, {
               exceptions: false
             })
@@ -569,7 +571,7 @@ export default function test(expect, SmartModel) {
 
           it('should throw errors if exceptions:true', function () {
             const Model = SmartModel.create('Model', {
-              prop1: { required: true }
+              prop: { required: true }
             }, {
               exceptions: true
             })
@@ -577,6 +579,62 @@ export default function test(expect, SmartModel) {
             expect(() => {
               new Model()
             }).to.throw(Error)
+          })
+
+          it('should not throw errors if exceptions.required:false', function () {
+            const Model = SmartModel.create('Model', {
+              prop: { required: true }
+            }, {
+              exceptions: {
+                required: false
+              }
+            })
+
+            expect(() => {
+              new Model()
+            }).to.not.throw(Error)
+          })
+
+          it('should not throw errors if exceptions.type:false', function () {
+            const Model = SmartModel.create('Model', {
+              prop: { type: String }
+            }, {
+              exceptions: {
+                type: false
+              }
+            })
+
+            expect(() => {
+              new Model({ prop: 0 })
+            }).to.not.throw(Error)
+          })
+
+          it('should not throw errors if exceptions.strict:false', function () {
+            const Model = SmartModel.create('Model', {
+              prop1: { type: String }
+            }, {
+              exceptions: {
+                strict: false
+              }
+            })
+
+            expect(() => {
+              new Model({ prop2: 'ok' })
+            }).to.not.throw(Error)
+          })
+
+          it('should not throw errors if exceptions.rule:false', function () {
+            const Model = SmartModel.create('Model', {
+              prop: { rule: { min: (value) => value < 2 } }
+            }, {
+              exceptions: {
+                rule: false
+              }
+            })
+
+            expect(() => {
+              new Model({ prop: 1 })
+            }).to.not.throw(Error)
           })
         })
       })

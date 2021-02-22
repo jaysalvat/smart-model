@@ -2,18 +2,11 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.3.2 built 2021-02-22 10:45:15
+* @version 0.3.2 built 2021-02-22 17:05:21
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
 "use strict";
-
-class SmartModelError extends Error {
-  constructor(data) {
-    super(data.message);
-    Object.assign(this, data);
-  }
-}
 
 function isArray(value) {
   return Array.isArray(value);
@@ -36,11 +29,11 @@ function isEqual(value1, value2) {
 }
 
 function isClass(value) {
-  return value.toString().startsWith("class");
+  return value && value.toString().startsWith("class");
 }
 
 function isPlainObject(value) {
-  return value.toString() === "[object Object]";
+  return value && value.toString() === "[object Object]";
 }
 
 function isType(value, Type) {
@@ -65,6 +58,16 @@ function isType(value, Type) {
   return false;
 }
 
+function merge(source, target) {
+  target = Object.assign({}, source, target);
+  Object.keys(source).forEach((key => {
+    if (isPlainObject(source[key]) && isPlainObject(target[key])) {
+      target[key] = Object.assign({}, source[key], merge(source[key], target[key]));
+    }
+  }));
+  return target;
+}
+
 function toArray(value) {
   return [].concat([], value);
 }
@@ -73,12 +76,44 @@ function pascalCase(string) {
   return string.normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[a-z]+/gi).map((word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())).join("");
 }
 
-function checkErrors(entry, property, value) {
+class SmartModelError extends Error {
+  constructor(data) {
+    super(data.message);
+    Object.assign(this, data);
+  }
+}
+
+SmartModelError.throw = function(settings, code, message, property, source) {
+  const shortCode = code.split(":")[0];
+  if (settings.exceptions === true || isPlainObject(settings.exceptions) && settings.exceptions[shortCode]) {
+    throw new SmartModelError({
+      message: message,
+      property: property,
+      code: code,
+      source: source && source.constructor.name
+    });
+  }
+};
+
+function checkErrors(entry, property, value, first, settings = {}) {
   const errors = [];
+  if (settings.strict && (!entry || !Object.keys(entry).length)) {
+    errors.push({
+      message: `Property "${property}" can't be set in strict mode`,
+      code: "strict"
+    });
+  }
   if (entry.required && isEmpty(value)) {
     errors.push({
-      message: `Invalid value 'required' on property '${property}'`,
+      message: `Property "${property}" is "required"`,
       code: "required"
+    });
+    return errors;
+  }
+  if (entry.readonly && !first) {
+    errors.push({
+      message: `Property '${property}' is 'readonly'`,
+      code: "readonly"
     });
     return errors;
   }
@@ -88,7 +123,7 @@ function checkErrors(entry, property, value) {
   if (entry.type && (entry.required || !isEmpty(value))) {
     if (!toArray(entry.type).some((type => isType(value, type)))) {
       errors.push({
-        message: `Invalid type '${typeof value}' on property '${property}'`,
+        message: `Property "${property}" has an invalid type "${typeof value}"`,
         code: "type"
       });
     }
@@ -98,8 +133,8 @@ function checkErrors(entry, property, value) {
       const rule = entry.rule[key];
       if (rule(value)) {
         errors.push({
-          message: `Invalid value '${key}' on property '${property}'`,
-          code: key
+          message: `Property "${property}" breaks the "${key}" rule`,
+          code: "rule:" + key
         });
       }
     }));
@@ -123,18 +158,13 @@ class SmartModelProxy {
   constructor(schema, settings) {
     return new Proxy(this, {
       set(target, property, value) {
-        let entry = schema[property];
+        const entry = schema[property] || {};
         const old = target[property];
-        const updated = !isEqual(value, old);
+        const first = isUndef(old);
+        const updated = !first && !isEqual(value, old);
         const Nested = createNested(entry, property, settings);
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, old, schema ]);
-        }
-        if (!entry) {
-          if (settings.strict) {
-            return true;
-          }
-          entry = {};
         }
         trigger(target.onBeforeSet);
         if (updated) {
@@ -144,15 +174,13 @@ class SmartModelProxy {
           value = trigger(entry.transform, [ value, schema ]);
         }
         if (settings.exceptions) {
-          const errors = checkErrors(entry, property, value);
+          const errors = checkErrors(entry, property, value, first, settings);
           if (errors.length) {
-            throw new SmartModelError({
-              message: errors[0].message,
-              property: property,
-              code: errors[0].code,
-              source: target.constructor.name
-            });
+            SmartModelError.throw(settings, errors[0].code, errors[0].message, property, target);
           }
+        }
+        if (settings.strict && (!entry || !Object.keys(entry).length)) {
+          return true;
         }
         if (Nested) {
           value = new Nested(value instanceof Object ? value : {});
@@ -237,11 +265,17 @@ class SmartModel extends SmartModelProxy {
 
 SmartModel.settings = {
   strict: false,
-  exceptions: true
+  exceptions: {
+    readonly: false,
+    required: true,
+    rule: true,
+    strict: false,
+    type: true
+  }
 };
 
 SmartModel.create = function(name, schema, settings, prototype) {
-  settings = Object.assign({}, SmartModel.settings, settings);
+  settings = merge(SmartModel.settings, settings);
   const Model = {
     [name]: class extends SmartModel {
       constructor(data) {
@@ -259,7 +293,7 @@ SmartModel.create = function(name, schema, settings, prototype) {
       if (Nested) {
         subErrors = Nested.checkErrors(value, filters);
       }
-      let errors = checkErrors(entry, property, value);
+      let errors = checkErrors(entry, property, value, false);
       if (subErrors) {
         invalidations[property] = subErrors;
       } else if (errors.length) {

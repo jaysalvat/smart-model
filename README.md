@@ -1,11 +1,22 @@
-[![npm version](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model.svg)](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model)
+```
+ ________  _____ ______   ________  ________  _________  _____ ______   ________  ________  _______   ___          
+|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\___   ___\\   _ \  _   \|\   __  \|\   ___ \|\  ___ \ |\  \         
+\ \  \___|\ \  \\\__\ \  \ \  \|\  \ \  \|\  \|___ \  \_\ \  \\\__\ \  \ \  \|\  \ \  \_|\ \ \   __/|\ \  \        
+ \ \_____  \ \  \\|__| \  \ \   __  \ \   _  _\   \ \  \ \ \  \\|__| \  \ \  \\\  \ \  \ \\ \ \  \_|/_\ \  \       
+  \|____|\  \ \  \    \ \  \ \  \ \  \ \  \\  \|   \ \  \ \ \  \    \ \  \ \  \\\  \ \  \_\\ \ \  \_|\ \ \  \____  
+    ____\_\  \ \__\    \ \__\ \__\ \__\ \__\\ _\    \ \__\ \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\
+   |\_________\|__|     \|__|\|__|\|__|\|__|\|__|    \|__|  \|__|     \|__|\|_______|\|_______|\|_______|\|_______|
+   \|_________|                                                                                                    
+```
 
+[![npm version](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model.svg)](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model)
+                                                                                                     
 SmartModel
 ==========
 
 Javascript object model.
 
-- [x] ~1Kb gzipped
+- [x] 1Kb+ gzipped
 - [x] Value transformation
 - [x] Value format
 - [x] Value type validation

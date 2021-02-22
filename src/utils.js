@@ -21,11 +21,11 @@ export function isEqual(value1, value2) {
 }
 
 export function isClass(value) {
-  return value.toString().startsWith('class')
+  return value && value.toString().startsWith('class')
 }
 
 export function isPlainObject(value) {
-  return value.toString() === '[object Object]'
+  return value && value.toString() === '[object Object]'
 }
 
 export function isType(value, Type) {
@@ -52,6 +52,18 @@ export function isType(value, Type) {
   }
 
   return false
+}
+
+export function merge(source, target) {
+  target = Object.assign({}, source, target)
+
+  Object.keys(source).forEach((key) => {
+    if (isPlainObject(source[key]) && isPlainObject(target[key])) {
+      target[key] = Object.assign({}, source[key], merge(source[key], target[key]))
+    }
+  })
+
+  return target
 }
 
 export function toArray(value) {
