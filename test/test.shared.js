@@ -6,6 +6,12 @@ export default function test(expect, SmartModel) {
 
   let undef
 
+  /*****
+   * @TODO: Test method put()
+   * @TODO: Test method patch()
+   * @TODO: Test method eject()
+   */
+
   describe('SmartModel tests', function () {
 
     // Init

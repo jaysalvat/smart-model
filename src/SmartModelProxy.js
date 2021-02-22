@@ -1,12 +1,13 @@
 import SmartModelError from './SmartModelError.js'
 import checkErrors from './checkErrors.js'
 import createNested from './createNested.js'
-import { isFn, isEqual, isUndef } from './utils.js'
+import { eject, isFn, isEqual, isUndef } from './utils.js'
 
 class SmartModelProxy {
   constructor(schema, settings) {
-    return new Proxy(this, {
+    let revoked = false
 
+    return new Proxy(this, {
       set(target, property, value) {
         const entry = schema[property] || {}
         const old = target[property]
@@ -58,6 +59,21 @@ class SmartModelProxy {
       get(target, property) {
         const entry = schema[property]
         let value = target[property]
+
+        if (property === 'eject') {
+          return function () {
+            revoked = true
+            const ejection = eject(target)
+
+            revoked = false
+
+            return ejection
+          }
+        }
+
+        if (revoked) {
+          return value
+        }
 
         if (!entry) {
           return target[property]

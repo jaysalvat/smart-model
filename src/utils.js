@@ -1,5 +1,7 @@
 /* eslint-disable new-cap */
 
+import SmartModel from './SmartModel.js'
+
 export function isArray(value) {
   return Array.isArray(value)
 }
@@ -64,6 +66,18 @@ export function merge(source, target) {
 
 export function toArray(value) {
   return [].concat([], value)
+}
+
+export function eject(target) {
+  target = Object.assign({}, target)
+
+  Object.keys(target).forEach((key) => {
+    if (target[key] instanceof SmartModel) {
+      target[key] = target[key].eject()
+    }
+  })
+
+  return target
 }
 
 export function pascalCase(string) {
