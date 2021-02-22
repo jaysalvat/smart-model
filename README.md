@@ -5,7 +5,7 @@ Model
 
 Javascript object model.
 
-- [x] 1Kb gzipped
+- [x] ~1Kb gzipped
 - [x] Value transformation
 - [x] Value format
 - [x] Value type validation

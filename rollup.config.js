@@ -1,4 +1,6 @@
+/* eslint-disable camelcase */
 import { terser } from 'rollup-plugin-terser'
+import filesize from 'rollup-plugin-filesize'
 import pkg from './package.json'
 
 const NAME = 'SmartModel'
@@ -12,8 +14,8 @@ const formats = [ 'esm', 'esm.min', 'umd', 'umd.min' ]
 const mutedWarnings = [ 'CIRCULAR_DEPENDENCY' ]
 const watched = process.env.ROLLUP_WATCH
 
-const bannerLight = `/*! ${NAME} v${pkg.version} */`
-const bannerFull = `
+const bannerMinify = `/*! ${NAME} v${pkg.version} */`
+const bannerBeautify = `
 /**!
 * ${NAME}
 * ${pkg.description}
@@ -22,6 +24,29 @@ const bannerFull = `
 * @license ${pkg.license}
 * @author Jay Salvat http://jaysalvat.com
 */`
+
+const terserBeautify = {
+  mangle: false,
+  compress: false,
+  output: {
+    beautify: true,
+    indent_level: 2,
+    braces: true
+  }
+}
+
+const terserMinify = {
+  mangle: {
+    toplevel: true
+  },
+  compress: {
+    toplevel: true,
+    reduce_funcs: true,
+    keep_infinity: true,
+    pure_getters: true,
+    passes: 10
+  }
+}
 
 formats.forEach((type) => {
   const [ format, minify ] = type.split('.')
@@ -34,9 +59,12 @@ formats.forEach((type) => {
       format: format,
       file: DIST + '/' + filename,
       name: format === 'umd' ? NAME : null,
-      banner: !watched && (minify ? bannerLight : bannerFull),
+      banner: !watched && (minify ? bannerMinify : bannerBeautify),
       plugins: [
-        !watched && minify ? terser() : null
+        !watched && terser(minify ? terserMinify : terserBeautify),
+        filesize({
+          showMinifiedSize: false
+        })
       ]
     },
     onwarn: (warning, warn) => {
