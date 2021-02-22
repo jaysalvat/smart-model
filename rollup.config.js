@@ -10,7 +10,12 @@ const DIST = './build'
 const DATE = new Date().toISOString().replace(/[TZ]/g, ' ').split('.')[0]
 
 const configs = []
-const formats = [ 'iife', 'iife.min', 'esm', 'esm.min', 'cjs', 'cjs.min', 'umd', 'umd.min', 'umd.min' ]
+const formats = [
+  'iife', 'iife.min',
+  'esm', 'esm.min',
+  'cjs', 'cjs.min',
+  'umd', 'umd.min'
+]
 const mutedWarnings = [ 'CIRCULAR_DEPENDENCY' ]
 const watched = process.env.ROLLUP_WATCH
 
@@ -37,10 +42,10 @@ const terserBeautify = {
 
 const terserMinify = {
   mangle: {
-    toplevel: true
+    toplevel: false
   },
   compress: {
-    toplevel: true,
+    toplevel: false,
     reduce_funcs: true,
     keep_infinity: true,
     pure_getters: true,
@@ -50,7 +55,10 @@ const terserMinify = {
 
 formats.forEach((type) => {
   const [ format, minify ] = type.split('.')
-  const filename = FILENAME + (format === 'iife' ? '' : '.' + format) + (minify ? '.min' : '') + '.js'
+  const extension = format === 'cjs' ? '.cjs' : '.js'
+  const postfix = format === 'iife' ? '' : '.' + format
+  const postfixMin = minify ? '.min' : ''
+  const filename = FILENAME + postfix + postfixMin + extension
 
   configs.push({
     input: SRC + '/index.js',
