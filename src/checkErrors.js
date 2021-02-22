@@ -1,4 +1,4 @@
-import { isEmpty, toArray, isType } from './utils.js'
+import { toArray, isType } from './utils.js'
 
 export default function checkErrors(entry, property, value, first, settings) {
   const errors = []
@@ -10,7 +10,7 @@ export default function checkErrors(entry, property, value, first, settings) {
     })
   }
 
-  if (entry.required && isEmpty(value)) {
+  if (entry.required && settings.empty(value)) {
     errors.push({
       message: `Property "${property}" is "required"`,
       code: 'required'
@@ -32,7 +32,7 @@ export default function checkErrors(entry, property, value, first, settings) {
     return errors
   }
 
-  if (entry.type && (entry.required || !isEmpty(value))) {
+  if (entry.type && (entry.required || !settings.empty(value))) {
     if (!toArray(entry.type).some((type) => isType(value, type))) {
       errors.push({
         message: `Property "${property}" has an invalid type "${typeof value}"`,

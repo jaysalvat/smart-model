@@ -38,6 +38,7 @@ class SmartModel extends SmartModelProxy {
 }
 
 SmartModel.settings = {
+  empty: (value) => value === '' || value === null || isUndef(value),
   strict: false,
   exceptions: {
     readonly: false,

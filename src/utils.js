@@ -8,10 +8,6 @@ export function isUndef(value) {
   return typeof value === 'undefined'
 }
 
-export function isEmpty(value) {
-  return value === '' || value === null || isUndef(value)
-}
-
 export function isFn(value) {
   return typeof value === 'function'
 }
