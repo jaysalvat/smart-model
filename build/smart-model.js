@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.3.2 built 2021-02-23 09:55:37
+* @version 0.3.3 built 2021-02-23 12:22:54
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -29,7 +29,34 @@ var SmartModel = function() {
   function isPlainObject(value) {
     return value && value.toString() === "[object Object]";
   }
-  function isType(value, Type) {
+  function keys(obj, cb = function() {}) {
+    return Object.keys(obj).map(cb);
+  }
+  function toArray(value) {
+    return [].concat([], value);
+  }
+  function merge(source, target) {
+    target = Object.assign({}, source, target);
+    keys(source, (key => {
+      if (isPlainObject(source[key]) && isPlainObject(target[key])) {
+        target[key] = Object.assign({}, source[key], merge(source[key], target[key]));
+      }
+    }));
+    return target;
+  }
+  function eject(target) {
+    target = Object.assign({}, target);
+    keys(target, (key => {
+      if (isSmartModel(target[key])) {
+        target[key] = target[key].$eject();
+      }
+    }));
+    return target;
+  }
+  function pascalCase(string) {
+    return string.normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[a-z1-9]+/gi).map((word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())).join("");
+  }
+  function checkType(value, Type) {
     const match = Type && Type.toString().match(/^\s*function (\w+)/);
     const type = (match ? match[1] : "object").toLowerCase();
     if (type === "date" && value instanceof Type) {
@@ -49,33 +76,6 @@ var SmartModel = function() {
       return true;
     }
     return false;
-  }
-  function keys(obj, cb = function() {}) {
-    return Object.keys(obj).map(cb);
-  }
-  function merge(source, target) {
-    target = Object.assign({}, source, target);
-    keys(source, (key => {
-      if (isPlainObject(source[key]) && isPlainObject(target[key])) {
-        target[key] = Object.assign({}, source[key], merge(source[key], target[key]));
-      }
-    }));
-    return target;
-  }
-  function toArray(value) {
-    return [].concat([], value);
-  }
-  function eject(target) {
-    target = Object.assign({}, target);
-    keys(target, (key => {
-      if (target[key] instanceof SmartModel) {
-        target[key] = target[key].eject();
-      }
-    }));
-    return target;
-  }
-  function pascalCase(string) {
-    return string.normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[a-z]+/gi).map((word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())).join("");
   }
   class SmartModelError extends Error {
     constructor(data) {
@@ -121,7 +121,7 @@ var SmartModel = function() {
     }
     if (entry.type && (entry.required || !settings.empty(value))) {
       if (!(isSmartModel(entry.type) && isPlainObject(value))) {
-        if (!toArray(entry.type).some((type => isType(value, type)))) {
+        if (!toArray(entry.type).some((type => checkType(value, type)))) {
           errors.push({
             message: `Property "${property}" has an invalid type "${typeof value}"`,
             code: "type"
@@ -157,7 +157,6 @@ var SmartModel = function() {
   }
   class SmartModelProxy {
     constructor(schema, settings) {
-      let revoked = false;
       return new Proxy(this, {
         set(target, property, value) {
           const entry = schema[property] || {};
@@ -166,19 +165,22 @@ var SmartModel = function() {
           const updated = !first && !isEqual(value, old);
           const Nested = createNested(entry, property, settings);
           function trigger(method, args) {
-            return Reflect.apply(method, target, args ? args : [ property, value, old, schema ]);
+            const returned = Reflect.apply(method, target, args ? args : [ property, value, old, schema ]);
+            return !isUndef(returned) ? returned : value;
           }
-          trigger(target.$onBeforeSet);
+          value = trigger(target.$onBeforeSet);
           if (updated) {
-            trigger(target.$onBeforeUpdate);
+            value = trigger(target.$onBeforeUpdate);
           }
           if (isFn(entry.transform)) {
             value = trigger(entry.transform, [ value, schema ]);
           }
-          if (settings.exceptions) {
-            const errors = checkErrors(entry, property, value, first, settings);
-            if (errors.length) {
+          const errors = checkErrors(entry, property, value, first, settings);
+          if (errors.length) {
+            if (settings.exceptions) {
               SmartModelError.throw(settings, errors[0].code, errors[0].message, property, target);
+            } else {
+              return true;
             }
           }
           if (settings.strict && !keys(entry).length) {
@@ -199,30 +201,24 @@ var SmartModel = function() {
           let value = target[property];
           if (property === "$eject") {
             return function() {
-              let ejection = {};
-              revoked = true;
-              ejection = eject(target);
-              revoked = false;
-              return ejection;
+              return eject(target);
             };
-          }
-          if (revoked) {
-            return value;
           }
           if (!entry) {
             return target[property];
           }
           function trigger(method, args) {
-            return Reflect.apply(method, target, args ? args : [ property, value, schema ]);
+            const returned = Reflect.apply(method, target, args ? args : [ property, value, schema ]);
+            return !isUndef(returned) ? returned : value;
           }
-          trigger(target.$onBeforeGet);
+          value = trigger(target.$onBeforeGet);
           if (isFn(entry)) {
             value = trigger(entry, [ target, schema ]);
           }
           if (isFn(entry.format)) {
             value = trigger(entry.format, [ value, schema ]);
           }
-          trigger(target.$onGet);
+          value = trigger(target.$onGet);
           return value;
         },
         deleteProperty(target, property) {
@@ -280,8 +276,10 @@ var SmartModel = function() {
         }
       }));
     }
-    $delete(key) {
-      Reflect.deleteProperty(this, key);
+    $delete(properties) {
+      toArray(properties).forEach((key => {
+        Reflect.deleteProperty(this, key);
+      }));
     }
     $onBeforeGet() {}
     $onBeforeSet() {}
