@@ -1,12 +1,9 @@
 ```
- ________  _____ ______   ________  ________  _________  _____ ______   ________  ________  _______   ___          
-|\   ____\|\   _ \  _   \|\   __  \|\   __  \|\___   ___\\   _ \  _   \|\   __  \|\   ___ \|\  ___ \ |\  \         
-\ \  \___|\ \  \\\__\ \  \ \  \|\  \ \  \|\  \|___ \  \_\ \  \\\__\ \  \ \  \|\  \ \  \_|\ \ \   __/|\ \  \        
- \ \_____  \ \  \\|__| \  \ \   __  \ \   _  _\   \ \  \ \ \  \\|__| \  \ \  \\\  \ \  \ \\ \ \  \_|/_\ \  \       
-  \|____|\  \ \  \    \ \  \ \  \ \  \ \  \\  \|   \ \  \ \ \  \    \ \  \ \  \\\  \ \  \_\\ \ \  \_|\ \ \  \____  
-    ____\_\  \ \__\    \ \__\ \__\ \__\ \__\\ _\    \ \__\ \ \__\    \ \__\ \_______\ \_______\ \_______\ \_______\
-   |\_________\|__|     \|__|\|__|\|__|\|__|\|__|    \|__|  \|__|     \|__|\|_______|\|_______|\|_______|\|_______|
-   \|_________|                                                                                                    
+ ___  __  __    __    ____  ____  __  __  _____  ____  ____  __   
+/ __)(  \/  )  /__\  (  _ \(_  _)(  \/  )(  _  )(  _ \( ___)(  )  
+\__ \ )    (  /(__)\  )   /  )(   )    (  )(_)(  )(_) ))__)  )(__ 
+(___/(_/\/\_)(__)(__)(_)\_) (__) (_/\/\_)(_____)(____/(____)(____)
+
 ```
 
 [![npm version](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model.svg)](https://badge.fury.io/js/%40jaysalvat%2Fsmart-model)
@@ -16,7 +13,7 @@ SmartModel
 
 Javascript object model.
 
-- [x] 1Kb+ gzipped
+- [x] 1.5Kb+ gzipped
 - [x] Value transformation
 - [x] Value format
 - [x] Value type validation
@@ -139,7 +136,7 @@ const post = new Post({
 Options for property:
 
 | Option      | Type    | Description 
-| ----------- | ------- | ---
+| :---------- | :------ | :--
 | type        | any     | The required type (*) of a value. You can set a schema or another model (*) in order to nest models 
 | required    | bool    | The value is required. See `settings.empty` for the empty check function
 | readonly    | bool    | The value can't be overwritten
@@ -226,11 +223,11 @@ const Discount = SmartModel.create('Discount', {
 
 ### Settings
 
-| Option      | Type        | Default       | Description
-| ----------- | ----------- | ------------- | ---
-| strict      | bool        | false         | Allow to set property not present in the schema
-| empty       | fn          | fn (***)      | Function to check if a value is empty if required
-| exceptions  | bool/object | object (****) | Throw exceptions on errors. can be `boolean` or òbject` for advanced settings
+| Option      | Type        | Default        | Description
+| :---------- | :---------- | :------------- | :--
+| strict      | bool        | false          | Allow to set property not present in the schema
+| empty       | fn          | fn (***)       | Function to check if a value is empty if required
+| exceptions  | bool/object | object (****)  | Throw exceptions on errors. can be `boolean` or òbject` for advanced settings
 
 #### [***] Empty check function 
 
@@ -243,7 +240,7 @@ The default function to check if a value is empty is:
 #### [****] Exceptions object
 
 | Option    | Type | Default 
-| --------- | ---- | -------
+| :-------- | :--- | :------
 | readonly  | bool | false
 | required  | bool | true
 | rule      | bool | true
@@ -257,7 +254,7 @@ The default function to check if a value is empty is:
 ```javascript
 const article = new Article()
 
-article.put({
+article.$put({
   title: 'My article',
 
 })
@@ -272,7 +269,7 @@ Same as $put, but only passed property are updated.
 ```javascript
 const article = new Article()
 
-const json = article.eject()
+const json = article.$eject()
 ```
 
 ### Custom methods 
