@@ -14,13 +14,15 @@ class SmartModelProxy {
         const Nested = createNested(entry, property, settings)
 
         function trigger(method, args) {
-          return Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
+          const returned = Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
+
+          return !isUndef(returned) ? returned : value
         }
 
-        trigger(target.$onBeforeSet)
+        value = trigger(target.$onBeforeSet)
 
         if (updated) {
-          trigger(target.$onBeforeUpdate)
+          value = trigger(target.$onBeforeUpdate)
         }
 
         if (isFn(entry.transform)) {
@@ -71,10 +73,12 @@ class SmartModelProxy {
         }
 
         function trigger(method, args) {
-          return Reflect.apply(method, target, args ? args : [ property, value, schema ])
+          const returned = Reflect.apply(method, target, args ? args : [ property, value, schema ])
+
+          return !isUndef(returned) ? returned : value
         }
 
-        trigger(target.$onBeforeGet)
+        value = trigger(target.$onBeforeGet)
 
         if (isFn(entry)) {
           value = trigger(entry, [ target, schema ])
@@ -84,7 +88,7 @@ class SmartModelProxy {
           value = trigger(entry.format, [ value, schema ])
         }
 
-        trigger(target.$onGet)
+        value = trigger(target.$onGet)
 
         return value
       },

@@ -4,11 +4,6 @@ import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
 import { toArray, isSmartModel, keys, merge, isArray, isUndef } from './utils.js'
 
-/**
- * @TODO: Stop set in exceptions
- * @TODO: Intercept Events
- */
-
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings)

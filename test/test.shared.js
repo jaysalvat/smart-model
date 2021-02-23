@@ -357,6 +357,68 @@ export default function test(expect, SmartModel) {
       it('should trigger $onGet', testTrigger('$onGet'))
       it('should trigger $onSet', testTrigger('$onSet'))
       it('should trigger $onUpdate', testTrigger('$onUpdate'))
+
+      it('should intercept set', () => {
+        let isIntercepted
+        const Model = SmartModel.create('Model', {
+          prop: { default: 'default string' }
+        }, {}, {
+          $onBeforeSet() {
+            return 'INTERCEPTED'
+          },
+
+          $onSet(_, val) {
+            isIntercepted = val === 'INTERCEPTED'
+          }
+        })
+
+        const model = new Model()
+
+        expect(model.prop).to.be.equal('INTERCEPTED')
+        expect(isIntercepted).to.be.equal(true)
+      })
+
+      it('should intercept update', () => {
+        let isIntercepted
+        const Model = SmartModel.create('Model', {
+          prop: { default: 'default string' }
+        }, {}, {
+          $onBeforeUpdate() {
+            return 'INTERCEPTED'
+          },
+
+          $onUpdate(_, val) {
+            isIntercepted = val === 'INTERCEPTED'
+          }
+        })
+
+        const model = new Model()
+
+        model.prop = 'updated'
+
+        expect(model.prop).to.be.equal('INTERCEPTED')
+        expect(isIntercepted).to.be.equal(true)
+      })
+
+      it('should intercept get', () => {
+        let isIntercepted
+        const Model = SmartModel.create('Model', {
+          prop: { default: 'default string' }
+        }, {}, {
+          $onBeforeGet() {
+            return 'INTERCEPTED'
+          },
+
+          $onGet(_, val) {
+            isIntercepted = val === 'INTERCEPTED'
+          }
+        })
+
+        const model = new Model()
+
+        expect(model.prop).to.be.equal('INTERCEPTED')
+        expect(isIntercepted).to.be.equal(true)
+      })
     })
 
     // Methods
