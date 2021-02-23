@@ -2,7 +2,7 @@
 import SmartModelProxy from './SmartModelProxy.js'
 import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
-import { isSmartModel, keys, merge, toArray, isArray, isUndef } from './utils.js'
+import { toArray, isSmartModel, keys, merge, isArray, isUndef } from './utils.js'
 
 /**
  * #TODO: Hydrate nested
@@ -53,8 +53,10 @@ class SmartModel extends SmartModelProxy {
     })
   }
 
-  $delete(key) {
-    Reflect.deleteProperty(this, key)
+  $delete(properties) {
+    toArray(properties).forEach((key) => {
+      Reflect.deleteProperty(this, key)
+    })
   }
 
   $onBeforeGet() {}

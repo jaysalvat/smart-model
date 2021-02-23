@@ -6,12 +6,6 @@ export default function test(expect, SmartModel) {
 
   let undef
 
-  /*****
-   * @TODO: Test method $put()
-   * @TODO: Test method $patch()
-   * @TODO: Test method $eject()
-   */
-
   describe('SmartModel tests', function () {
 
     // Init
@@ -366,6 +360,128 @@ export default function test(expect, SmartModel) {
     })
 
     // Methods
+
+    describe('Methods', function () {
+      describe('$put', function () {
+        it('should replace model data', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: { default: 'string2' },
+            prop3: {
+              type: {
+                nestedProp1: { default: 'string3' },
+                nestedProp2: { default: 'string4' }
+              }
+            }
+          })
+
+          const model = new Model()
+
+          model.$put({
+            prop1: 'newString1',
+            prop3: {
+              nestedProp1: 'newString2',
+              new: 'string'
+            },
+            new: 'string'
+          })
+
+          expect(model.prop1).to.be.equal('newString1')
+          expect(model.prop2).to.be.equal(undef)
+          expect(model.new).to.be.equal('string')
+          expect(model.prop3.nestedProp1).to.be.equal('newString2')
+          expect(model.prop3.nestedProp2).to.be.equal(undef)
+          expect(model.prop3.new).to.be.equal('string')
+        })
+      })
+
+      describe('$patch', function () {
+        it('should replace model data', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: { default: 'string2' },
+            prop3: {
+              type: {
+                nestedProp1: { default: 'string3' },
+                nestedProp2: { default: 'string4' }
+              }
+            }
+          })
+
+          const model = new Model()
+
+          model.$patch({
+            prop1: 'newString1',
+            prop3: {
+              nestedProp1: 'newString2',
+              new: 'string'
+            },
+            new: 'string'
+          })
+
+          expect(model.prop1).to.be.equal('newString1')
+          expect(model.prop2).to.be.equal('string2')
+          expect(model.new).to.be.equal('string')
+          expect(model.prop3.nestedProp1).to.be.equal('newString2')
+          expect(model.prop3.nestedProp2).to.be.equal('string4')
+          expect(model.prop3.new).to.be.equal('string')
+        })
+      })
+
+      describe('$delete', function () {
+        it('should delete one property', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: { default: 'string2' }
+          })
+
+          const model = new Model()
+
+          model.$delete('prop2')
+
+          expect(model.prop1).to.be.equal('string1')
+          expect(model.prop2).to.be.equal(undef)
+        })
+
+        it('should delete an array of properties', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: { default: 'string2' },
+            prop3: { default: 'string3' }
+          })
+
+          const model = new Model()
+
+          model.$delete([ 'prop2', 'prop3' ])
+
+          expect(model).have.own.property('prop1')
+          expect(model).not.have.own.property('prop2')
+          expect(model).not.have.own.property('prop3')
+        })
+      })
+
+      describe('$eject', function () {
+        it('should works', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: {
+              type: {
+                nestedProp: { default: 'string2' }
+              }
+            }
+          })
+
+          const model = new Model()
+          const obj = model.$eject()
+
+          expect(obj).to.be.deep.equal(model)
+          expect(model).to.be.instanceOf(SmartModel)
+          expect(model.prop2).to.be.instanceOf(SmartModel)
+          expect(obj).to.not.be.instanceOf(SmartModel)
+          expect(obj.prop2).to.not.be.instanceOf(SmartModel)
+        })
+      })
+    })
 
     describe('Statics methods', function () {
       describe('CheckErrors', function () {
