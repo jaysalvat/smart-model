@@ -6,8 +6,6 @@ import { merge, toArray, isArray, isUndef } from './utils.js'
 
 /**
  * @TODO: Stop set in exceptions
- * @TODO: Recursive put
- * @TODO: Recursive patch
  * #TODO: Revoke delete and set
  */
 
@@ -37,9 +35,18 @@ class SmartModel extends SmartModelProxy {
   $put(data) {
     Object.keys(this).forEach((key) => {
       if (data[key]) {
-        this[key] = data[key]
+        if (this[key] instanceof SmartModel) {
+          this[key].$put(data[key])
+        } else {
+          this[key] = data[key]
+        }
       } else {
-        this.$delete()
+        this.$delete(key)
+      }
+    })
+    Object.keys(data).forEach((key) => {
+      if (!this[key]) {
+        this[key] = data[key]
       }
     })
   }
