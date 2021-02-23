@@ -54,8 +54,8 @@ export function eject(target) {
   target = Object.assign({}, target)
 
   keys(target, (key) => {
-    if (target[key] instanceof SmartModel) {
-      target[key] = target[key].eject()
+    if (isSmartModel(target[key])) {
+      target[key] = target[key].$eject()
     }
   })
 
@@ -66,7 +66,7 @@ export function pascalCase(string) {
   return string
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .match(/[a-z]+/gi)
+    .match(/[a-z1-9]+/gi)
     .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
     .join('')
 }
