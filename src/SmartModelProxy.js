@@ -27,11 +27,13 @@ class SmartModelProxy {
           value = trigger(entry.transform, [ value, schema ])
         }
 
-        if (settings.exceptions) {
-          const errors = checkErrors(entry, property, value, first, settings)
+        const errors = checkErrors(entry, property, value, first, settings)
 
-          if (errors.length) {
+        if (errors.length) {
+          if (settings.exceptions) {
             SmartModelError.throw(settings, errors[0].code, errors[0].message, property, target)
+          } else {
+            return true
           }
         }
 

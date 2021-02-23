@@ -5,8 +5,8 @@ import checkErrors from './checkErrors.js'
 import { toArray, isSmartModel, keys, merge, isArray, isUndef } from './utils.js'
 
 /**
- * #TODO: Hydrate nested
  * @TODO: Stop set in exceptions
+ * @TODO: Intercept Events
  */
 
 class SmartModel extends SmartModelProxy {
