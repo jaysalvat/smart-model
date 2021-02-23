@@ -2,7 +2,7 @@
 import SmartModelProxy from './SmartModelProxy.js'
 import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
-import { toArray, isSmartModel, keys, merge, isArray, isUndef } from './utils.js'
+import { toArray, keys, merge, isSmartModel, isFn, isArray, isUndef } from './utils.js'
 
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
@@ -12,7 +12,7 @@ class SmartModel extends SmartModelProxy {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default
-        } else {
+        } else if (!isFn(schema[key])) {
           this[key] = data[key]
         }
       }
@@ -52,15 +52,6 @@ class SmartModel extends SmartModelProxy {
       Reflect.deleteProperty(this, key)
     })
   }
-
-  $onBeforeGet() {}
-  $onBeforeSet() {}
-  $onBeforeUpdate() {}
-  $onDelete() {}
-  $onGet() {}
-  $onBeforeDelete() {}
-  $onSet() {}
-  $onUpdate() {}
 }
 
 SmartModel.settings = {
@@ -72,10 +63,20 @@ SmartModel.settings = {
     rule: true,
     strict: false,
     type: true
+  },
+  methods: {
+    $onBeforeGet: () => {},
+    $onBeforeSet: () => {},
+    $onBeforeUpdate: () => {},
+    $onDelete: () => {},
+    $onGet: () => {},
+    $onBeforeDelete: () => {},
+    $onSet: () => {},
+    $onUpdate: () => {}
   }
 }
 
-SmartModel.create = function (name, schema, settings, prototype) {
+SmartModel.create = function (name, schema, settings) {
   settings = merge(SmartModel.settings, settings)
 
   const Model = { [name]: class extends SmartModel {
@@ -123,7 +124,7 @@ SmartModel.create = function (name, schema, settings, prototype) {
     }
   }
 
-  Object.assign(Model.prototype, prototype)
+  Object.assign(Model.prototype, settings.methods)
 
   Model.schema = schema
 

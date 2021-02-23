@@ -13,7 +13,7 @@ SmartModel
 
 Javascript object model.
 
-- [x] 1.5Kb+ gzipped
+- [x] ~1.5Kb gzipped
 - [x] Value transformation
 - [x] Value format
 - [x] Value type validation
@@ -60,7 +60,7 @@ import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/sm
 Better documentation soon...
 
 ```javascript
-function readingtime(text) { /*...*/ }
+function readingTime(text) { /*...*/ }
 
 const Post = SmartModel.create('Post', {
     title: {
@@ -71,8 +71,8 @@ const Post = SmartModel.create('Post', {
       required: true,
       type: String,
       rule: {
-        'tooShort': (calue) => value.length < 100,
-        'tooLong': (calue) => value.length > 1000,
+        'tooShort': (value) => value.length < 100,
+        'tooLong': (value) => value.length > 1000,
       }
     },
     createdAt: {
@@ -107,12 +107,12 @@ const Post = SmartModel.create('Post', {
   // Settings
   {
     strict: false,
-    exceptions: true
-  }
-  // Events
-  {
-    onUpdate() {
-      this.updatedAt = new Date()
+    exceptions: true,
+    // Events
+    methods: {
+      $onUpdate() {
+        this.updatedAt = new Date()
+      }
     }
   }
 )
@@ -128,6 +128,11 @@ const post = new Post({
   }
 })
 ```
+
+```javascript
+console.log(post.createdAt)
+```
+
 
 ## Documentation
 
@@ -251,12 +256,13 @@ The default function to check if a value is empty is:
 
 #### $put
 
+Replace the model properties. Existing properties are deleted.
+
 ```javascript
 const article = new Article()
 
 article.$put({
-  title: 'My article',
-
+  title: 'My article'
 })
 ```
 
@@ -281,9 +287,11 @@ const Article = SmartModel.create('Article', {
   body: {
     type: String
   }
-}, {}, {
-  excerpt(limit = 10) {
-    return this.body.substr(0, limit) + '…'
+}, {
+  methods: {
+    excerpt(limit = 10) {
+      return this.body.substr(0, limit) + '…'
+    }
   }
 })
 ```
@@ -297,15 +305,17 @@ const User = SmartModel.create('User', {
   username: {
     type: String
   }
-}, {}, {
-  $onBeforeGet() {}
-  $onBeforeSet() {}
-  $onBeforeUpdate() {}
-  $onDelete() {}
-  $onGet() {}
-  $onBeforeDelete() {}
-  $onSet() {}
-  $onUpdate() {}
+}, {
+  methods: {
+    $onBeforeGet() {}
+    $onBeforeSet() {}
+    $onBeforeUpdate() {}
+    $onDelete() {}
+    $onGet() {}
+    $onBeforeDelete() {}
+    $onSet() {}
+    $onUpdate() {}
+  }
 })
 ```
 

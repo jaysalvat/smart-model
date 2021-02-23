@@ -348,7 +348,7 @@ export default function test(expect, SmartModel) {
 
     // Events
 
-    describe('Events', function () {
+    describe('Hooks', function () {
       it('should trigger $onBeforeDelete', testTrigger('$onBeforeDelete'))
       it('should trigger $onBeforeGet', testTrigger('$onBeforeGet'))
       it('should trigger $onBeforeSet', testTrigger('$onBeforeSet'))
@@ -362,13 +362,15 @@ export default function test(expect, SmartModel) {
         let isIntercepted
         const Model = SmartModel.create('Model', {
           prop: { default: 'default string' }
-        }, {}, {
-          $onBeforeSet() {
-            return 'INTERCEPTED'
-          },
+        }, {
+          methods: {
+            $onBeforeSet() {
+              return 'INTERCEPTED'
+            },
 
-          $onSet(_, val) {
-            isIntercepted = val === 'INTERCEPTED'
+            $onSet(_, val) {
+              isIntercepted = val === 'INTERCEPTED'
+            }
           }
         })
 
@@ -382,13 +384,15 @@ export default function test(expect, SmartModel) {
         let isIntercepted
         const Model = SmartModel.create('Model', {
           prop: { default: 'default string' }
-        }, {}, {
-          $onBeforeUpdate() {
-            return 'INTERCEPTED'
-          },
+        }, {
+          methods: {
+            $onBeforeUpdate() {
+              return 'INTERCEPTED'
+            },
 
-          $onUpdate(_, val) {
-            isIntercepted = val === 'INTERCEPTED'
+            $onUpdate(_, val) {
+              isIntercepted = val === 'INTERCEPTED'
+            }
           }
         })
 
@@ -404,13 +408,15 @@ export default function test(expect, SmartModel) {
         let isIntercepted
         const Model = SmartModel.create('Model', {
           prop: { default: 'default string' }
-        }, {}, {
-          $onBeforeGet() {
-            return 'INTERCEPTED'
-          },
+        }, {
+          methods: {
+            $onBeforeGet() {
+              return 'INTERCEPTED'
+            },
 
-          $onGet(_, val) {
-            isIntercepted = val === 'INTERCEPTED'
+            $onGet(_, val) {
+              isIntercepted = val === 'INTERCEPTED'
+            }
           }
         })
 
@@ -536,7 +542,7 @@ export default function test(expect, SmartModel) {
           const model = new Model()
           const obj = model.$eject()
 
-          expect(obj).to.be.deep.equal(model)
+          expect(JSON.stringify(obj)).to.be.deep.equal(JSON.stringify(model))
           expect(model).to.be.instanceOf(SmartModel)
           expect(model.prop2).to.be.instanceOf(SmartModel)
           expect(obj).to.not.be.instanceOf(SmartModel)
@@ -545,7 +551,7 @@ export default function test(expect, SmartModel) {
       })
     })
 
-    describe('Statics methods', function () {
+    describe('Static methods', function () {
       describe('CheckErrors', function () {
         it('should return an array of model errors', function () {
           const Model = SmartModel.create('Model', {
@@ -661,165 +667,165 @@ export default function test(expect, SmartModel) {
           })
         })
       })
+    })
 
-      // Settings
+    // Settings
 
-      describe('Settings', function () {
-        it('should set settings for all instances', function () {
-          SmartModel.settings.strict = true
-          SmartModel.settings.exceptions.strict = false
+    describe('Settings', function () {
+      it('should set settings for all instances', function () {
+        SmartModel.settings.strict = true
+        SmartModel.settings.exceptions.strict = false
 
-          const Model1 = SmartModel.create('Model1', {
-            prop1: { type: String }
-          })
-
-          const Model2 = SmartModel.create('Model2', {
-            prop1: { type: String }
-          }, { strict: false })
-
-          const Model3 = SmartModel.create('Model3', {
-            prop1: { type: String }
-          })
-
-          const model1 = new Model1({
-            prop1: 'string',
-            prop2: 'string'
-          })
-
-          const model2 = new Model2({
-            prop1: 'string',
-            prop2: 'string'
-          })
-
-          const model3 = new Model3({
-            prop1: 'string',
-            prop2: 'string'
-          })
-
-          expect(model1.prop1).to.be.equal('string')
-          expect(model1.prop2).to.be.equal(undef)
-
-          expect(model2.prop1).to.be.equal('string')
-          expect(model2.prop2).to.be.equal('string')
-
-          expect(model3.prop1).to.be.equal('string')
-          expect(model3.prop2).to.be.equal(undef)
+        const Model1 = SmartModel.create('Model1', {
+          prop1: { type: String }
         })
 
-        describe('strict', function () {
-          it('should not set undefined properties if strict:true', function () {
-            const Model = SmartModel.create('Model', {
-              prop1: { type: String }
-            }, {
-              strict: true
-            })
+        const Model2 = SmartModel.create('Model2', {
+          prop1: { type: String }
+        }, { strict: false })
 
-            const model = new Model({
-              prop1: 'string',
-              prop2: 'string'
-            })
+        const Model3 = SmartModel.create('Model3', {
+          prop1: { type: String }
+        })
 
-            expect(model.prop1).to.be.equal('string')
-            expect(model.prop2).to.be.equal(undef)
+        const model1 = new Model1({
+          prop1: 'string',
+          prop2: 'string'
+        })
+
+        const model2 = new Model2({
+          prop1: 'string',
+          prop2: 'string'
+        })
+
+        const model3 = new Model3({
+          prop1: 'string',
+          prop2: 'string'
+        })
+
+        expect(model1.prop1).to.be.equal('string')
+        expect(model1.prop2).to.be.equal(undef)
+
+        expect(model2.prop1).to.be.equal('string')
+        expect(model2.prop2).to.be.equal('string')
+
+        expect(model3.prop1).to.be.equal('string')
+        expect(model3.prop2).to.be.equal(undef)
+      })
+
+      describe('strict', function () {
+        it('should not set undefined properties if strict:true', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { type: String }
+          }, {
+            strict: true
           })
 
-          it('should set undefined properties if strict:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop1: { type: String }
-            }, {
+          const model = new Model({
+            prop1: 'string',
+            prop2: 'string'
+          })
+
+          expect(model.prop1).to.be.equal('string')
+          expect(model.prop2).to.be.equal(undef)
+        })
+
+        it('should set undefined properties if strict:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { type: String }
+          }, {
+            strict: false
+          })
+
+          const model = new Model({
+            prop1: 'string',
+            prop2: 'string'
+          })
+
+          expect(model.prop1).to.be.equal('string')
+          expect(model.prop2).to.be.equal('string')
+        })
+      })
+
+      describe('exceptions', function () {
+        it('should not throw errors if exceptions:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { required: true }
+          }, {
+            exceptions: false
+          })
+
+          expect(() => {
+            new Model()
+          }).to.not.throw(Error)
+        })
+
+        it('should throw errors if exceptions:true', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { required: true }
+          }, {
+            exceptions: true
+          })
+
+          expect(() => {
+            new Model()
+          }).to.throw(Error)
+        })
+
+        it('should not throw errors if exceptions.required:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { required: true }
+          }, {
+            exceptions: {
+              required: false
+            }
+          })
+
+          expect(() => {
+            new Model()
+          }).to.not.throw(Error)
+        })
+
+        it('should not throw errors if exceptions.type:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { type: String }
+          }, {
+            exceptions: {
+              type: false
+            }
+          })
+
+          expect(() => {
+            new Model({ prop: 0 })
+          }).to.not.throw(Error)
+        })
+
+        it('should not throw errors if exceptions.strict:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { type: String }
+          }, {
+            exceptions: {
               strict: false
-            })
-
-            const model = new Model({
-              prop1: 'string',
-              prop2: 'string'
-            })
-
-            expect(model.prop1).to.be.equal('string')
-            expect(model.prop2).to.be.equal('string')
+            }
           })
+
+          expect(() => {
+            new Model({ prop2: 'ok' })
+          }).to.not.throw(Error)
         })
 
-        describe('exceptions', function () {
-          it('should not throw errors if exceptions:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop: { required: true }
-            }, {
-              exceptions: false
-            })
-
-            expect(() => {
-              new Model()
-            }).to.not.throw(Error)
+        it('should not throw errors if exceptions.rule:false', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { rule: { min: (value) => value < 2 } }
+          }, {
+            exceptions: {
+              rule: false
+            }
           })
 
-          it('should throw errors if exceptions:true', function () {
-            const Model = SmartModel.create('Model', {
-              prop: { required: true }
-            }, {
-              exceptions: true
-            })
-
-            expect(() => {
-              new Model()
-            }).to.throw(Error)
-          })
-
-          it('should not throw errors if exceptions.required:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop: { required: true }
-            }, {
-              exceptions: {
-                required: false
-              }
-            })
-
-            expect(() => {
-              new Model()
-            }).to.not.throw(Error)
-          })
-
-          it('should not throw errors if exceptions.type:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop: { type: String }
-            }, {
-              exceptions: {
-                type: false
-              }
-            })
-
-            expect(() => {
-              new Model({ prop: 0 })
-            }).to.not.throw(Error)
-          })
-
-          it('should not throw errors if exceptions.strict:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop1: { type: String }
-            }, {
-              exceptions: {
-                strict: false
-              }
-            })
-
-            expect(() => {
-              new Model({ prop2: 'ok' })
-            }).to.not.throw(Error)
-          })
-
-          it('should not throw errors if exceptions.rule:false', function () {
-            const Model = SmartModel.create('Model', {
-              prop: { rule: { min: (value) => value < 2 } }
-            }, {
-              exceptions: {
-                rule: false
-              }
-            })
-
-            expect(() => {
-              new Model({ prop: 1 })
-            }).to.not.throw(Error)
-          })
+          expect(() => {
+            new Model({ prop: 1 })
+          }).to.not.throw(Error)
         })
       })
     })
@@ -1010,11 +1016,13 @@ export default function test(expect, SmartModel) {
       let property, value, oldValue
       const Model = SmartModel.create('Model', {
         prop: { default: 'old value' }
-      }, {}, {
-        [name](prop, val, oldVal) {
-          property = prop
-          value = val
-          oldValue = oldVal
+      }, {
+        methods: {
+          [name](prop, val, oldVal) {
+            property = prop
+            value = val
+            oldValue = oldVal
+          }
         }
       })
 
