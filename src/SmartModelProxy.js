@@ -5,8 +5,6 @@ import { keys, eject, isFn, isEqual, isUndef } from './utils.js'
 
 class SmartModelProxy {
   constructor(schema, settings) {
-    let revoked = false
-
     return new Proxy(this, {
       set(target, property, value) {
         const entry = schema[property] || {}
@@ -62,18 +60,8 @@ class SmartModelProxy {
 
         if (property === '$eject') {
           return function () {
-            let ejection = {}
-
-            revoked = true
-            ejection = eject(target)
-            revoked = false
-
-            return ejection
+            return eject(target)
           }
-        }
-
-        if (revoked) {
-          return value
         }
 
         if (!entry) {
