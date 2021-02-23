@@ -828,6 +828,26 @@ export default function test(expect, SmartModel) {
           }).to.not.throw(Error)
         })
       })
+
+      describe('Methods', function () {
+        it('should add methods to instance', function () {
+          const Model = SmartModel.create('Model', {
+            prop: { type: String }
+          }, {
+            methods: {
+              myMethods(param) {
+                return this.prop + ':' + param
+              }
+            }
+          })
+
+          const model = new Model({
+            prop: 'string'
+          })
+
+          expect(model.myMethods('param')).to.be.equal('string:param')
+        })
+      })
     })
 
     // Nested models

@@ -96,8 +96,11 @@ const Post = SmartModel.create('Post', {
           type: String
         },
         lastname: {
-          type: String
-        }
+          required: true,
+          type: String,
+          transform: (value) => value.toUpperCase()
+        },
+        fullname: (author) => author.firstname + ' ' + author.lastname
       }
     },
     // Virtual properties
@@ -121,18 +124,42 @@ const Post = SmartModel.create('Post', {
 ```javascript
 const post = new Post({
   title: 'My new post',
-  body: 'Lorem ipsum...',
+  body: 'Very long post...',
   author: {
-    firstname: 'Brad',
-    lastname: 'Pitt'
+    firstname: 'James',
+    lastname: 'Hetfield'
   }
 })
 ```
 
 ```javascript
-console.log(post.createdAt)
+console.log(post)
 ```
 
+```ssh
+Post {
+  createdAt: 2020-01-31T09:50:00.000Z,
+  updatedAt: 2020-01-31T09:50:00.000Z,
+  title: 'My new post',
+  body: 'Very long post...',
+  author: Author {  
+    firstname: 'James', 
+    lastname: 'Hetfield' 
+  }
+}
+```
+
+```javascript
+console.log(post.author.fullname)
+console.log(post.createdAt)
+console.log(post.readingTime)
+```
+
+```ssh
+James HETFIELD
+01/31/2020, 9:50:00 AM
+12 minutes
+```
 
 ## Documentation
 
