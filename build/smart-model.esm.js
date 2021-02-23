@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.3.3 built 2021-02-23 12:22:54
+* @version 0.3.4 built 2021-02-23 18:42:31
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -262,7 +262,7 @@ class SmartModel extends SmartModelProxy {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default;
-        } else {
+        } else if (!isFn(schema[key])) {
           this[key] = data[key];
         }
       }
@@ -297,14 +297,6 @@ class SmartModel extends SmartModelProxy {
       Reflect.deleteProperty(this, key);
     }));
   }
-  $onBeforeGet() {}
-  $onBeforeSet() {}
-  $onBeforeUpdate() {}
-  $onDelete() {}
-  $onGet() {}
-  $onBeforeDelete() {}
-  $onSet() {}
-  $onUpdate() {}
 }
 
 SmartModel.settings = {
@@ -316,10 +308,20 @@ SmartModel.settings = {
     rule: true,
     strict: false,
     type: true
+  },
+  methods: {
+    $onBeforeGet: () => {},
+    $onBeforeSet: () => {},
+    $onBeforeUpdate: () => {},
+    $onDelete: () => {},
+    $onGet: () => {},
+    $onBeforeDelete: () => {},
+    $onSet: () => {},
+    $onUpdate: () => {}
   }
 };
 
-SmartModel.create = function(name, schema, settings, prototype) {
+SmartModel.create = function(name, schema, settings) {
   settings = merge(SmartModel.settings, settings);
   const Model = {
     [name]: class extends SmartModel {
@@ -359,7 +361,7 @@ SmartModel.create = function(name, schema, settings, prototype) {
       return new Model(payload);
     }
   };
-  Object.assign(Model.prototype, prototype);
+  Object.assign(Model.prototype, settings.methods);
   Model.schema = schema;
   return Model;
 };
