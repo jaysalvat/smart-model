@@ -1,7 +1,7 @@
 import SmartModelError from './SmartModelError.js'
 import checkErrors from './checkErrors.js'
 import createNested from './createNested.js'
-import { eject, isFn, isEqual, isUndef } from './utils.js'
+import { keys, eject, isFn, isEqual, isUndef } from './utils.js'
 
 class SmartModelProxy {
   constructor(schema, settings) {
@@ -37,7 +37,7 @@ class SmartModelProxy {
           }
         }
 
-        if (settings.strict && !Object.keys(entry).length) {
+        if (settings.strict && !keys(entry).length) {
           return true
         }
 

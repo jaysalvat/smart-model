@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.3.2 built 2021-02-22 17:05:21
+* @version 0.3.2 built 2021-02-23 09:55:37
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -12,10 +12,6 @@ function isArray(value) {
 
 function isUndef(value) {
   return typeof value === "undefined";
-}
-
-function isEmpty(value) {
-  return value === "" || value === null || isUndef(value);
 }
 
 function isFn(value) {
@@ -28,6 +24,10 @@ function isEqual(value1, value2) {
 
 function isClass(value) {
   return value && value.toString().startsWith("class");
+}
+
+function isSmartModel(value) {
+  return value.prototype instanceof SmartModel || value instanceof SmartModel;
 }
 
 function isPlainObject(value) {
@@ -56,9 +56,13 @@ function isType(value, Type) {
   return false;
 }
 
+function keys(obj, cb = function() {}) {
+  return Object.keys(obj).map(cb);
+}
+
 function merge(source, target) {
   target = Object.assign({}, source, target);
-  Object.keys(source).forEach((key => {
+  keys(source, (key => {
     if (isPlainObject(source[key]) && isPlainObject(target[key])) {
       target[key] = Object.assign({}, source[key], merge(source[key], target[key]));
     }
@@ -68,6 +72,16 @@ function merge(source, target) {
 
 function toArray(value) {
   return [].concat([], value);
+}
+
+function eject(target) {
+  target = Object.assign({}, target);
+  keys(target, (key => {
+    if (target[key] instanceof SmartModel) {
+      target[key] = target[key].eject();
+    }
+  }));
+  return target;
 }
 
 function pascalCase(string) {
@@ -93,15 +107,15 @@ SmartModelError.throw = function(settings, code, message, property, source) {
   }
 };
 
-function checkErrors(entry, property, value, first, settings = {}) {
+function checkErrors(entry, property, value, first, settings) {
   const errors = [];
-  if (settings.strict && (!entry || !Object.keys(entry).length)) {
+  if (settings.strict && (!entry || !keys(entry).length)) {
     errors.push({
       message: `Property "${property}" can't be set in strict mode`,
       code: "strict"
     });
   }
-  if (entry.required && isEmpty(value)) {
+  if (entry.required && settings.empty(value)) {
     errors.push({
       message: `Property "${property}" is "required"`,
       code: "required"
@@ -118,16 +132,18 @@ function checkErrors(entry, property, value, first, settings = {}) {
   if (typeof value === "undefined") {
     return errors;
   }
-  if (entry.type && (entry.required || !isEmpty(value))) {
-    if (!toArray(entry.type).some((type => isType(value, type)))) {
-      errors.push({
-        message: `Property "${property}" has an invalid type "${typeof value}"`,
-        code: "type"
-      });
+  if (entry.type && (entry.required || !settings.empty(value))) {
+    if (!(isSmartModel(entry.type) && isPlainObject(value))) {
+      if (!toArray(entry.type).some((type => isType(value, type)))) {
+        errors.push({
+          message: `Property "${property}" has an invalid type "${typeof value}"`,
+          code: "type"
+        });
+      }
     }
   }
   if (entry.rule) {
-    Object.keys(entry.rule).forEach((key => {
+    keys(entry.rule, (key => {
       const rule = entry.rule[key];
       if (rule(value)) {
         errors.push({
@@ -144,16 +160,19 @@ function createNested(entry = {}, property, settings) {
   if (!entry.type) {
     return false;
   }
-  const Child = entry.type.prototype instanceof SmartModel ? entry.type : false;
+  const Child = isSmartModel(entry.type) ? entry.type : false;
   const schema = isPlainObject(entry.type) ? entry.type : false;
   if (Child || schema) {
-    return Child ? Child : SmartModel.create(pascalCase(property), schema, settings);
+    const Model = Child ? Child : SmartModel.create(pascalCase(property), schema, settings);
+    entry.type = Model;
+    return Model;
   }
   return false;
 }
 
 class SmartModelProxy {
   constructor(schema, settings) {
+    let revoked = false;
     return new Proxy(this, {
       set(target, property, value) {
         const entry = schema[property] || {};
@@ -164,9 +183,9 @@ class SmartModelProxy {
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, old, schema ]);
         }
-        trigger(target.onBeforeSet);
+        trigger(target.$onBeforeSet);
         if (updated) {
-          trigger(target.onBeforeUpdate);
+          trigger(target.$onBeforeUpdate);
         }
         if (isFn(entry.transform)) {
           value = trigger(entry.transform, [ value, schema ]);
@@ -177,55 +196,63 @@ class SmartModelProxy {
             SmartModelError.throw(settings, errors[0].code, errors[0].message, property, target);
           }
         }
-        if (settings.strict && (!entry || !Object.keys(entry).length)) {
+        if (settings.strict && !keys(entry).length) {
           return true;
         }
         if (Nested) {
-          value = new Nested(value instanceof Object ? value : {});
+          value = new Nested(value);
         }
         target[property] = value;
-        trigger(target.onSet);
+        trigger(target.$onSet);
         if (updated) {
-          trigger(target.onUpdate);
+          trigger(target.$onUpdate);
         }
         return true;
       },
       get(target, property) {
         const entry = schema[property];
         let value = target[property];
+        if (property === "$eject") {
+          return function() {
+            let ejection = {};
+            revoked = true;
+            ejection = eject(target);
+            revoked = false;
+            return ejection;
+          };
+        }
+        if (revoked) {
+          return value;
+        }
         if (!entry) {
           return target[property];
         }
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, schema ]);
         }
-        trigger(target.onBeforeGet);
+        trigger(target.$onBeforeGet);
         if (isFn(entry)) {
           value = trigger(entry, [ target, schema ]);
         }
         if (isFn(entry.format)) {
           value = trigger(entry.format, [ value, schema ]);
         }
-        trigger(target.onGet);
+        trigger(target.$onGet);
         return value;
       },
       deleteProperty(target, property) {
         const value = target[property];
-        const entry = schema[property];
+        const entry = schema[property] || {};
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, schema ]);
         }
         if (entry.required) {
-          throw new SmartModelError({
-            message: `Invalid delete on required propery ${property}`,
-            property: property,
-            code: "required"
-          });
+          SmartModelError.throw(settings, "required", `Property "${property}" is "required"`, property, target);
         }
-        trigger(target.onBeforeDelete);
+        trigger(target.$onBeforeDelete);
         Reflect.deleteProperty(target, property);
-        trigger(target.onDelete);
-        trigger(target.onUpdate);
+        trigger(target.$onDelete);
+        trigger(target.$onUpdate);
         return true;
       }
     });
@@ -235,7 +262,7 @@ class SmartModelProxy {
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings);
-    Object.keys(schema).forEach((key => {
+    keys(schema, (key => {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default;
@@ -244,24 +271,46 @@ class SmartModel extends SmartModelProxy {
         }
       }
     }));
-    this.feed(data);
+    this.$patch(data);
   }
-  feed(data) {
-    Object.keys(data).forEach((key => {
+  $patch(data) {
+    keys(data, (key => {
       this[key] = data[key];
     }));
   }
-  onBeforeGet() {}
-  onBeforeSet() {}
-  onBeforeUpdate() {}
-  onDelete() {}
-  onGet() {}
-  onBeforeDelete() {}
-  onSet() {}
-  onUpdate() {}
+  $put(data) {
+    keys(this, (key => {
+      if (data[key]) {
+        if (isSmartModel(this[key])) {
+          this[key].$put(data[key]);
+        } else {
+          this[key] = data[key];
+        }
+      } else {
+        this.$delete(key);
+      }
+    }));
+    keys(data, (key => {
+      if (!this[key]) {
+        this[key] = data[key];
+      }
+    }));
+  }
+  $delete(key) {
+    Reflect.deleteProperty(this, key);
+  }
+  $onBeforeGet() {}
+  $onBeforeSet() {}
+  $onBeforeUpdate() {}
+  $onDelete() {}
+  $onGet() {}
+  $onBeforeDelete() {}
+  $onSet() {}
+  $onUpdate() {}
 }
 
 SmartModel.settings = {
+  empty: value => value === "" || value === null || isUndef(value),
   strict: false,
   exceptions: {
     readonly: false,
@@ -283,7 +332,7 @@ SmartModel.create = function(name, schema, settings, prototype) {
   }[name];
   Model.checkErrors = function(payload, filters) {
     const invalidations = {};
-    Object.keys(schema).forEach((property => {
+    keys(schema, (property => {
       let subErrors;
       const value = payload[property];
       const entry = schema[property];
@@ -291,7 +340,7 @@ SmartModel.create = function(name, schema, settings, prototype) {
       if (Nested) {
         subErrors = Nested.checkErrors(value, filters);
       }
-      let errors = checkErrors(entry, property, value, false);
+      let errors = checkErrors(entry, property, value, false, settings);
       if (subErrors) {
         invalidations[property] = subErrors;
       } else if (errors.length) {
@@ -303,7 +352,7 @@ SmartModel.create = function(name, schema, settings, prototype) {
         }
       }
     }));
-    return Object.keys(invalidations).length ? invalidations : false;
+    return keys(invalidations).length ? invalidations : false;
   };
   Model.hydrate = function(payload) {
     if (isArray(payload)) {

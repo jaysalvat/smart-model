@@ -23,14 +23,55 @@ export function isClass(value) {
 }
 
 export function isSmartModel(value) {
-  return isClass(value) && value.prototype instanceof SmartModel
+  return value.prototype instanceof SmartModel || value instanceof SmartModel
 }
 
 export function isPlainObject(value) {
   return value && value.toString() === '[object Object]'
 }
 
-export function isType(value, Type) {
+export function keys(obj, cb = function () { }) {
+  return Object.keys(obj).map(cb)
+}
+
+export function toArray(value) {
+  return [].concat([], value)
+}
+
+export function merge(source, target) {
+  target = Object.assign({}, source, target)
+
+  keys(source, (key) => {
+    if (isPlainObject(source[key]) && isPlainObject(target[key])) {
+      target[key] = Object.assign({}, source[key], merge(source[key], target[key]))
+    }
+  })
+
+  return target
+}
+
+export function eject(target) {
+  target = Object.assign({}, target)
+
+  keys(target, (key) => {
+    if (target[key] instanceof SmartModel) {
+      target[key] = target[key].eject()
+    }
+  })
+
+  return target
+}
+
+export function pascalCase(string) {
+  return string
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .match(/[a-z]+/gi)
+    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+    .join('')
+}
+
+export function checkType(value, Type) {
   const match = Type && Type.toString().match(/^\s*function (\w+)/)
   const type = (match ? match[1] : 'object').toLowerCase()
 
@@ -54,41 +95,4 @@ export function isType(value, Type) {
   }
 
   return false
-}
-
-export function merge(source, target) {
-  target = Object.assign({}, source, target)
-
-  Object.keys(source).forEach((key) => {
-    if (isPlainObject(source[key]) && isPlainObject(target[key])) {
-      target[key] = Object.assign({}, source[key], merge(source[key], target[key]))
-    }
-  })
-
-  return target
-}
-
-export function toArray(value) {
-  return [].concat([], value)
-}
-
-export function eject(target) {
-  target = Object.assign({}, target)
-
-  Object.keys(target).forEach((key) => {
-    if (target[key] instanceof SmartModel) {
-      target[key] = target[key].eject()
-    }
-  })
-
-  return target
-}
-
-export function pascalCase(string) {
-  return string
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .match(/[a-z]+/gi)
-    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
-    .join('')
 }

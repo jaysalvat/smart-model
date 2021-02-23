@@ -1,4 +1,4 @@
-import { pascalCase, isPlainObject } from './utils.js'
+import { pascalCase, isSmartModel, isPlainObject } from './utils.js'
 import SmartModel from './SmartModel.js'
 
 export default function createNested(entry = {}, property, settings) {
@@ -6,7 +6,7 @@ export default function createNested(entry = {}, property, settings) {
     return false
   }
 
-  const Child = entry.type.prototype instanceof SmartModel ? entry.type : false
+  const Child = isSmartModel(entry.type) ? entry.type : false
   const schema = isPlainObject(entry.type) ? entry.type : false
 
   if (Child || schema) {

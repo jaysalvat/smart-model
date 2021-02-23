@@ -2,9 +2,10 @@
 import SmartModelProxy from './SmartModelProxy.js'
 import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
-import { merge, toArray, isArray, isUndef } from './utils.js'
+import { isSmartModel, keys, merge, toArray, isArray, isUndef } from './utils.js'
 
 /**
+ * #TODO: Hydrate nested
  * @TODO: Stop set in exceptions
  * #TODO: Revoke delete and set
  */
@@ -13,7 +14,7 @@ class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings)
 
-    Object.keys(schema).forEach((key) => {
+    keys(schema, (key) => {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default
@@ -27,15 +28,15 @@ class SmartModel extends SmartModelProxy {
   }
 
   $patch(data) {
-    Object.keys(data).forEach((key) => {
+    keys(data, (key) => {
       this[key] = data[key]
     })
   }
 
   $put(data) {
-    Object.keys(this).forEach((key) => {
+    keys(this, (key) => {
       if (data[key]) {
-        if (this[key] instanceof SmartModel) {
+        if (isSmartModel(this[key])) {
           this[key].$put(data[key])
         } else {
           this[key] = data[key]
@@ -44,7 +45,8 @@ class SmartModel extends SmartModelProxy {
         this.$delete(key)
       }
     })
-    Object.keys(data).forEach((key) => {
+
+    keys(data, (key) => {
       if (!this[key]) {
         this[key] = data[key]
       }
@@ -89,7 +91,7 @@ SmartModel.create = function (name, schema, settings, prototype) {
   Model.checkErrors = function (payload, filters) {
     const invalidations = {}
 
-    Object.keys(schema).forEach((property) => {
+    keys(schema, (property) => {
       let subErrors
       const value = payload[property]
       const entry = schema[property]
@@ -114,7 +116,7 @@ SmartModel.create = function (name, schema, settings, prototype) {
       }
     })
 
-    return Object.keys(invalidations).length ? invalidations : false
+    return keys(invalidations).length ? invalidations : false
   }
 
   Model.hydrate = function (payload) {
