@@ -250,7 +250,32 @@ The default function to check if a value is empty is:
 | strict    | bool | false
 | type      | bool | true
 
-### Methods and callbacks
+### Methods 
+
+#### $put
+
+```javascript
+const article = new Article()
+
+article.put({
+  title: 'My article',
+
+})
+```
+
+#### $patch
+
+Same as $put, but only passed property are updated.
+
+#### $eject
+
+```javascript
+const article = new Article()
+
+const json = article.eject()
+```
+
+### Custom methods 
 
 Methods can be added to models.
 
@@ -266,6 +291,8 @@ const Article = SmartModel.create('Article', {
 })
 ```
 
+## Callbacks
+
 Models have some callbacks methods that are called when properties are set, get, updated or deleted.
 
 ```javascript
@@ -274,14 +301,14 @@ const User = SmartModel.create('User', {
     type: String
   }
 }, {}, {
-  onBeforeGet() {}
-  onBeforeSet() {}
-  onBeforeUpdate() {}
-  onDelete() {}
-  onGet() {}
-  onBeforeDelete() {}
-  onSet() {}
-  onUpdate() {}
+  $onBeforeGet() {}
+  $onBeforeSet() {}
+  $onBeforeUpdate() {}
+  $onDelete() {}
+  $onGet() {}
+  $onBeforeDelete() {}
+  $onSet() {}
+  $onUpdate() {}
 })
 ```
 

@@ -10,7 +10,11 @@ export default function createNested(entry = {}, property, settings) {
   const schema = isPlainObject(entry.type) ? entry.type : false
 
   if (Child || schema) {
-    return Child ? Child : SmartModel.create(pascalCase(property), schema, settings)
+    const Model = Child ? Child : SmartModel.create(pascalCase(property), schema, settings)
+
+    entry.type = Model
+
+    return Model
   }
 
   return false

@@ -19,10 +19,10 @@ class SmartModelProxy {
           return Reflect.apply(method, target, args ? args : [ property, value, old, schema ])
         }
 
-        trigger(target.onBeforeSet)
+        trigger(target.$onBeforeSet)
 
         if (updated) {
-          trigger(target.onBeforeUpdate)
+          trigger(target.$onBeforeUpdate)
         }
 
         if (isFn(entry.transform)) {
@@ -42,15 +42,15 @@ class SmartModelProxy {
         }
 
         if (Nested) {
-          value = new Nested(value instanceof Object ? value : {})
+          value = new Nested(value)
         }
 
         target[property] = value
 
-        trigger(target.onSet)
+        trigger(target.$onSet)
 
         if (updated) {
-          trigger(target.onUpdate)
+          trigger(target.$onUpdate)
         }
 
         return true
@@ -60,11 +60,12 @@ class SmartModelProxy {
         const entry = schema[property]
         let value = target[property]
 
-        if (property === 'eject') {
+        if (property === '$eject') {
           return function () {
-            revoked = true
-            const ejection = eject(target)
+            let ejection = {}
 
+            revoked = true
+            ejection = eject(target)
             revoked = false
 
             return ejection
@@ -83,7 +84,7 @@ class SmartModelProxy {
           return Reflect.apply(method, target, args ? args : [ property, value, schema ])
         }
 
-        trigger(target.onBeforeGet)
+        trigger(target.$onBeforeGet)
 
         if (isFn(entry)) {
           value = trigger(entry, [ target, schema ])
@@ -93,33 +94,29 @@ class SmartModelProxy {
           value = trigger(entry.format, [ value, schema ])
         }
 
-        trigger(target.onGet)
+        trigger(target.$onGet)
 
         return value
       },
 
       deleteProperty(target, property) {
         const value = target[property]
-        const entry = schema[property]
+        const entry = schema[property] || {}
 
         function trigger(method, args) {
           return Reflect.apply(method, target, args ? args : [ property, value, schema ])
         }
 
         if (entry.required) {
-          throw new SmartModelError({
-            message: `Invalid delete on required propery ${property}`,
-            property: property,
-            code: 'required'
-          })
+          SmartModelError.throw(settings, 'required', `Property "${property}" is "required"`, property, target)
         }
 
-        trigger(target.onBeforeDelete)
+        trigger(target.$onBeforeDelete)
 
         Reflect.deleteProperty(target, property)
 
-        trigger(target.onDelete)
-        trigger(target.onUpdate)
+        trigger(target.$onDelete)
+        trigger(target.$onUpdate)
 
         return true
       }

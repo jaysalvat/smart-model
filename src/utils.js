@@ -22,6 +22,10 @@ export function isClass(value) {
   return value && value.toString().startsWith('class')
 }
 
+export function isSmartModel(value) {
+  return isClass(value) && value.prototype instanceof SmartModel
+}
+
 export function isPlainObject(value) {
   return value && value.toString() === '[object Object]'
 }

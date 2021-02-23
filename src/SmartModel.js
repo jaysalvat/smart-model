@@ -4,6 +4,13 @@ import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
 import { merge, toArray, isArray, isUndef } from './utils.js'
 
+/**
+ * @TODO: Stop set in exceptions
+ * @TODO: Recursive put
+ * @TODO: Recursive patch
+ * #TODO: Revoke delete and set
+ */
+
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings)
@@ -18,23 +25,37 @@ class SmartModel extends SmartModelProxy {
       }
     })
 
-    this.feed(data)
+    this.$patch(data)
   }
 
-  feed(data) {
+  $patch(data) {
     Object.keys(data).forEach((key) => {
       this[key] = data[key]
     })
   }
 
-  onBeforeGet() {}
-  onBeforeSet() {}
-  onBeforeUpdate() {}
-  onDelete() {}
-  onGet() {}
-  onBeforeDelete() {}
-  onSet() {}
-  onUpdate() {}
+  $put(data) {
+    Object.keys(this).forEach((key) => {
+      if (data[key]) {
+        this[key] = data[key]
+      } else {
+        this.$delete()
+      }
+    })
+  }
+
+  $delete(key) {
+    Reflect.deleteProperty(this, key)
+  }
+
+  $onBeforeGet() {}
+  $onBeforeSet() {}
+  $onBeforeUpdate() {}
+  $onDelete() {}
+  $onGet() {}
+  $onBeforeDelete() {}
+  $onSet() {}
+  $onUpdate() {}
 }
 
 SmartModel.settings = {

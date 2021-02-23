@@ -186,14 +186,14 @@ export default function test(expect, SmartModel) {
 
           const types = [
             { type: Date, fail: 100, success: new Date() },
-            { type: Array, fail: {}, success: [] },
             { type: String, fail: 0, success: 'string' },
             { type: Object, fail: 'string', success: {} },
             { type: Number, fail: 'string', success: 100 },
             { type: Boolean, fail: 'string', success: true },
             { type: Function, fail: 'string', success: function () { } },
+            { type: TestModel, fail: 'string', success: testModel },
             { type: SmartModel, fail: {}, success: testModel },
-            { type: TestModel, fail: 'string', success: testModel }
+            { type: Array, fail: {}, success: [] }
           ]
 
           types.forEach((type) => {
@@ -355,14 +355,14 @@ export default function test(expect, SmartModel) {
     // Events
 
     describe('Events', function () {
-      it('should trigger onBeforeDelete', testTrigger('onBeforeDelete'))
-      it('should trigger onBeforeGet', testTrigger('onBeforeGet'))
-      it('should trigger onBeforeSet', testTrigger('onBeforeSet'))
-      it('should trigger onBeforeUpdate', testTrigger('onBeforeUpdate'))
-      it('should trigger onDelete', testTrigger('onDelete'))
-      it('should trigger onGet', testTrigger('onGet'))
-      it('should trigger onSet', testTrigger('onSet'))
-      it('should trigger onUpdate', testTrigger('onUpdate'))
+      it('should trigger $onBeforeDelete', testTrigger('$onBeforeDelete'))
+      it('should trigger $onBeforeGet', testTrigger('$onBeforeGet'))
+      it('should trigger $onBeforeSet', testTrigger('$onBeforeSet'))
+      it('should trigger $onBeforeUpdate', testTrigger('$onBeforeUpdate'))
+      it('should trigger $onDelete', testTrigger('$onDelete'))
+      it('should trigger $onGet', testTrigger('$onGet'))
+      it('should trigger $onSet', testTrigger('$onSet'))
+      it('should trigger $onUpdate', testTrigger('$onUpdate'))
     })
 
     // Methods
@@ -712,6 +712,24 @@ export default function test(expect, SmartModel) {
         expect(model.prop.nestedProp).to.be.an.instanceOf(SmartModel)
       })
 
+      it('should nest a child model and init it properly', function () {
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: {
+              nestedProp: {
+                default: 'string'
+              }
+            }
+          }
+        })
+
+        const model = new Model({
+          prop: {}
+        })
+
+        expect(model.prop.nestedProp).to.be.equal('string')
+      })
+
       it('should throw an error if a required parent prop is not set on init', function () {
         const Model = SmartModel.create('Model', {
           prop: {
@@ -826,12 +844,12 @@ export default function test(expect, SmartModel) {
 
       model.prop = 'new value'
 
-      if ([ 'onBeforeDelete', 'onDelete' ].includes(name)) {
+      if ([ '$onBeforeDelete', '$onDelete' ].includes(name)) {
         delete model.prop
 
         expect(property).to.be.equal('prop')
 
-      } else if ([ 'onBeforeGet', 'onGet' ].includes(name)) {
+      } else if ([ '$onBeforeGet', '$onGet' ].includes(name)) {
         model.prop = model.prop
 
         expect(property).to.be.equal('prop')

@@ -1,4 +1,4 @@
-import { toArray, isType } from './utils.js'
+import { isSmartModel, toArray, isType, isPlainObject } from './utils.js'
 
 export default function checkErrors(entry, property, value, first, settings) {
   const errors = []
@@ -33,11 +33,13 @@ export default function checkErrors(entry, property, value, first, settings) {
   }
 
   if (entry.type && (entry.required || !settings.empty(value))) {
-    if (!toArray(entry.type).some((type) => isType(value, type))) {
-      errors.push({
-        message: `Property "${property}" has an invalid type "${typeof value}"`,
-        code: 'type'
-      })
+    if (!(isSmartModel(entry.type) && isPlainObject(value))) {
+      if (!toArray(entry.type).some((type) => isType(value, type))) {
+        errors.push({
+          message: `Property "${property}" has an invalid type "${typeof value}"`,
+          code: 'type'
+        })
+      }
     }
   }
 
