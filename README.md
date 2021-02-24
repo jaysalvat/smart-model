@@ -24,7 +24,7 @@ Javascript object model.
 - [x] Throw exception (or not) if invalid
 - [x] Nested models
 - [x] Live cycle events
-- [ ] Proper documentation ^^
+- [ ] Better documentation ^^
 
 Works on modern browsers. 
 [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html) on your browser.
