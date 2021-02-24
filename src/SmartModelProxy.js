@@ -62,7 +62,7 @@ class SmartModelProxy {
         const entry = schema[property]
         let value = target[property]
 
-        if (property === '$eject') {
+        if ([ '$get' ].includes(property)) {
           return function () {
             return eject(target)
           }

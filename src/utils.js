@@ -55,7 +55,7 @@ export function eject(target) {
 
   keys(target, (key) => {
     if (isSmartModel(target[key])) {
-      target[key] = target[key].$eject()
+      target[key] = target[key].$get()
     }
   })
 

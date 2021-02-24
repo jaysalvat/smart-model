@@ -430,7 +430,29 @@ export default function test(expect, SmartModel) {
     // Methods
 
     describe('Methods', function () {
-      describe('$put', function () {
+      describe('$get', function () {
+        it('should works', function () {
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string1' },
+            prop2: {
+              type: {
+                nestedProp: { default: 'string2' }
+              }
+            }
+          })
+
+          const model = new Model()
+          const obj = model.$get()
+
+          expect(JSON.stringify(obj)).to.be.deep.equal(JSON.stringify(model))
+          expect(model).to.be.instanceOf(SmartModel)
+          expect(model.prop2).to.be.instanceOf(SmartModel)
+          expect(obj).to.not.be.instanceOf(SmartModel)
+          expect(obj.prop2).to.not.be.instanceOf(SmartModel)
+        })
+      })
+
+      describe('$post / $put', function () {
         it('should replace model data', function () {
           const Model = SmartModel.create('Model', {
             prop1: { default: 'string1' },
@@ -445,7 +467,7 @@ export default function test(expect, SmartModel) {
 
           const model = new Model()
 
-          model.$put({
+          model.$post({
             prop1: 'newString1',
             prop3: {
               nestedProp1: 'newString2',
@@ -525,28 +547,6 @@ export default function test(expect, SmartModel) {
           expect(model).have.own.property('prop1')
           expect(model).not.have.own.property('prop2')
           expect(model).not.have.own.property('prop3')
-        })
-      })
-
-      describe('$eject', function () {
-        it('should works', function () {
-          const Model = SmartModel.create('Model', {
-            prop1: { default: 'string1' },
-            prop2: {
-              type: {
-                nestedProp: { default: 'string2' }
-              }
-            }
-          })
-
-          const model = new Model()
-          const obj = model.$eject()
-
-          expect(JSON.stringify(obj)).to.be.deep.equal(JSON.stringify(model))
-          expect(model).to.be.instanceOf(SmartModel)
-          expect(model.prop2).to.be.instanceOf(SmartModel)
-          expect(obj).to.not.be.instanceOf(SmartModel)
-          expect(obj.prop2).to.not.be.instanceOf(SmartModel)
         })
       })
     })

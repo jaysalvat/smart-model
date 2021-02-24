@@ -21,6 +21,8 @@ class SmartModel extends SmartModelProxy {
     this.$patch(data)
   }
 
+  // Virtual $get
+
   $patch(data) {
     keys(data, (key) => {
       this[key] = data[key]
@@ -45,6 +47,10 @@ class SmartModel extends SmartModelProxy {
         this[key] = data[key]
       }
     })
+  }
+
+  $post(data) {
+    return this.$put(data)
   }
 
   $delete(properties) {

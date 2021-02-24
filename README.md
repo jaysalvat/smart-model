@@ -281,9 +281,21 @@ The default function to check if a value is empty is:
 
 ### Methods 
 
-#### $put
+#### $get
 
-Replace the model properties. Existing properties are deleted.
+Returns a standard JSON payload from the model content.
+
+```javascript
+const article = new Article()
+
+const json = article.$get()
+```
+
+#### $post / $put
+
+Replaces the model properties. 
+Existing properties are deleted.
+An exception is thrown if the properties are required.
 
 ```javascript
 const article = new Article()
@@ -295,14 +307,39 @@ article.$put({
 
 #### $patch
 
-Same as $put, but only passed property are updated.
+Same as $post / $put, but only passed property are updated.
 
-#### $eject
+#### $delete
+
+Delete a or muliple properties of the model. 
+An exception is thrown if the properties are required.
 
 ```javascript
 const article = new Article()
 
-const json = article.$eject()
+article.$delete([ 'title', 'body' ])
+```
+
+#### $check
+
+Static method. 
+Returns an array of potential errors if the payload where passed to the model.
+
+```javascript
+const errors = Article.$check(payload)
+```
+
+#### $hydrate
+
+Static method. 
+Transforms a object or an array of objects into models.
+Useful with API responses.
+
+```javascript
+fetch('https://api.com/post')
+  .then(response => response.json())
+  .then(response => Post.$hydrate(response))
+  .then(response) => { /* Array of hydrated models */ }
 ```
 
 ### Custom methods 
