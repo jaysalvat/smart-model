@@ -552,7 +552,7 @@ export default function test(expect, SmartModel) {
     })
 
     describe('Static methods', function () {
-      describe('CheckErrors', function () {
+      describe('$check', function () {
         it('should return an array of model errors', function () {
           const Model = SmartModel.create('Model', {
             prop1: { required: true },
@@ -566,7 +566,7 @@ export default function test(expect, SmartModel) {
             }
           })
 
-          const errrors = Model.checkErrors({
+          const errrors = Model.$check({
             prop2: 0,
             prop3: 'string',
             prop4: -1
@@ -589,7 +589,7 @@ export default function test(expect, SmartModel) {
             prop4: { type: String }
           })
 
-          const errrors = Model.checkErrors({
+          const errrors = Model.$check({
             prop2: 0,
             prop4: 0
           }, [ 'type' ])
@@ -609,7 +609,7 @@ export default function test(expect, SmartModel) {
             prop4: { type: String }
           })
 
-          const errrors = Model.checkErrors({
+          const errrors = Model.$check({
             prop1: 'string',
             prop3: 'string'
           })
@@ -622,7 +622,7 @@ export default function test(expect, SmartModel) {
             prop: { type: String, readonly: true }
           })
 
-          const errrors = Model.checkErrors({
+          const errrors = Model.$check({
             prop: 'string'
           })
 
@@ -630,7 +630,7 @@ export default function test(expect, SmartModel) {
         })
       })
 
-      describe('Hydrate', function () {
+      describe('$hydrate', function () {
         it('should hydrate a object', function () {
           const obj = {
             prop1: 'string'
@@ -641,7 +641,7 @@ export default function test(expect, SmartModel) {
             prop2: { default: 'default' }
           })
 
-          const model = Model.hydrate(obj)
+          const model = Model.$hydrate(obj)
 
           expect(model.prop1).to.be.equal('format: string')
           expect(model.prop2).to.be.equal('default')
@@ -659,7 +659,7 @@ export default function test(expect, SmartModel) {
             prop2: { default: 'default' }
           })
 
-          const models = Model.hydrate(objs)
+          const models = Model.$hydrate(objs)
 
           models.forEach((model, i) => {
             expect(model.prop1).to.be.equal('format: string ' + (i + 1))

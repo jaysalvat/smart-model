@@ -85,7 +85,7 @@ SmartModel.create = function (name, schema, settings) {
     }
   } }[name]
 
-  Model.checkErrors = function (payload, filters) {
+  Model.$check = function (payload, filters) {
     const invalidations = {}
 
     keys(schema, (property) => {
@@ -95,7 +95,7 @@ SmartModel.create = function (name, schema, settings) {
       const Nested = createNested(entry, property, settings)
 
       if (Nested) {
-        subErrors = Nested.checkErrors(value, filters)
+        subErrors = Nested.$check(value, filters)
       }
 
       let errors = checkErrors(entry, property, value, false, settings)
@@ -116,7 +116,7 @@ SmartModel.create = function (name, schema, settings) {
     return keys(invalidations).length ? invalidations : false
   }
 
-  Model.hydrate = function (payload) {
+  Model.$hydrate = function (payload) {
     if (isArray(payload)) {
       return payload.map((item) => new Model(item))
     } else {
