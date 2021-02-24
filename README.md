@@ -109,7 +109,7 @@ const Post = SmartModel.create('Post', {
   }, 
   // Settings
   {
-    strict: false,
+    strict: true,
     exceptions: true,
     // Events
     methods: {
@@ -136,7 +136,7 @@ const post = new Post({
 console.log(post)
 ```
 
-```ssh
+```javascript
 Post {
   createdAt: 2020-01-31T09:50:00.000Z,
   updatedAt: 2020-01-31T09:50:00.000Z,
@@ -169,17 +169,84 @@ Options for property:
 
 | Option      | Type    | Description 
 | :---------- | :------ | :--
-| type        | any     | The required type (*) of a value. You can set a schema or another model (*) in order to nest models 
-| required    | bool    | The value is required. See `settings.empty` for the empty check function
-| readonly    | bool    | The value can't be overwritten
-| default     | any     | The default value if the property is undefined
-| transform   | fn      | A function to transform the value to set
-| format      | fn      | A function to format the value to get
-| rule        | object  | An object which contains the validation rules (**)
+| default     | any     | Default value if the property is undefined
+| format      | fn      | Function to format the value when its read
+| readonly    | bool    | Boolean to prevent a value to be overwritten
+| required    | bool    | Boolean to prevent a value to be empty
+| rule        | object  | Object which contains the validation rules
+| transform   | fn      | Function to transform the value when its written
+| type        | any     | Required type of a value
 
-#### [*] Type
+#### default
 
-Type can be `String`, `Boolean`, `Number`,  `Date`, `Function` or a class.
+The default value if the property is undefined.
+
+#### format
+
+A function to format the value when its read.
+
+```javascript
+const Event = SmartModel.create('Event', {
+  name: { 
+    type: String 
+  },
+  date: {
+    type Date,
+    format: (value) => new Date(value).toLocaleString()
+  }
+})
+```
+
+** Use with caution **, it could be unexpected effects when object are copied (the formated value becomes the new value). 
+Consider using a computed property instead. 
+
+#### readonly
+
+The value can't be overwritten after init.
+
+#### required
+
+The value is required. See `settings.empty` for the empty value check function.
+
+#### rule
+
+An object which contains the validation rules
+Multiple rules of validation can be set on a property.
+
+```javascript
+const Discount = SmartModel.create('Discount', {
+  percent: {
+    type: Number,
+    rule: {
+      'min': {value) => value < 0,
+      'max': {value) => value > 100
+    }
+  }
+})
+```
+
+An exception is throw with the rule code when the condition if true.
+
+#### transform
+
+Function to transform the value when its written.
+
+```javascript
+const Event = SmartModel.create('Event', {
+  name: { 
+    type: String 
+  },
+  date: {
+    type Date,
+    transform: (value) => new Date(value)
+  }
+})
+```
+
+#### type
+
+The required type of a value.
+Type can be `Array`, `Boolean`, `Date`,  `Function`, `Object`, `String` or a class.
 If a schema is set as a type, a nested model will be created.
 
 ```javascript
@@ -198,7 +265,7 @@ const Post = SmartModel.create('Post', {
       firstname: {
         type: String
       },
-      lastnaame: {
+      lastname: {
         type: String
       }
     }
@@ -206,14 +273,14 @@ const Post = SmartModel.create('Post', {
 })
 ```
 
-An existing Model can be set as a type in order to nest this Model.
+An existing model can be set as a type in order to nest this model.
 
 ```javascript
 const Author = SmartModel.create('Author', {
   firstname: {
     type: String
   },
-  lastnaame: {
+  lastname: {
     type: String
   }
 })
@@ -237,39 +304,32 @@ const Post = SmartModel.create('Post', {
 })
 ```
 
-#### [**]s Rule
-
-Multiple rules of validation can be set on a property.
-
-```javascript
-const Discount = SmartModel.create('Discount', {
-  percent: {
-    type: Number,
-    rule: {
-      'min': {value) => value < 0,
-      'max': {value) => value > 100
-    }
-  }
-})
-```
-
 ### Settings
 
-| Option      | Type        | Default        | Description
-| :---------- | :---------- | :------------- | :--
-| strict      | bool        | false          | Allow to set property not present in the schema
-| empty       | fn          | fn (***)       | Function to check if a value is empty if required
-| exceptions  | bool/object | object (****)  | Throw exceptions on errors. can be `boolean` or òbject` for advanced settings
+| Option      | Type        | Default   | Description
+| :---------- | :---------- | :-------- | :--
+| empty       | fn          | fn        | Function to check if a value is empty if required
+| exceptions  | bool/object | object    | Object of exceptions settings
+| methods     | object      | object    | Object of custom methods
+| strict      | bool        | false     | Boolean to set only properties defined in the schema
 
-#### [***] Empty check function 
+#### empty
 
-The default function to check if a value is empty is:
+The function to check if a value is empty or not.
+Default function is the function below.
 
 ```javascript
 (value) => value === '' || value === null || value === undefined
 ```
 
-#### [****] Exceptions object
+#### strict
+
+If `strict`set to `true`, only properties defined in the schema will be set.
+
+#### exceptions
+
+Any type of thrown exceptions can be set individually.
+By default the `exceptions` settings is an object these default values:
 
 | Option    | Type | Default 
 | :-------- | :--- | :------
@@ -279,11 +339,32 @@ The default function to check if a value is empty is:
 | strict    | bool | false
 | type      | bool | true
 
-### Methods 
+If `exceptions` is set to `true`, all types of exceptions will be thrown.
+If `exceptions` is set to `false`, all types of exceptions will be thrown.
+
+### methods 
+
+Custom `methods` can be added to model. Those methods will be accessible in any instances of the model.
+
+```javascript
+const Article = SmartModel.create('Article', {
+  body: {
+    type: String
+  }
+}, {
+  methods: {
+    excerpt(limit = 10) {
+      return this.body.substr(0, limit) + '…'
+    }
+  }
+})
+```
+
+### Native methods 
 
 #### $get
 
-Returns a standard JSON payload from the model content.
+Returns standard JSON from the model content.
 
 ```javascript
 const article = new Article()
@@ -307,7 +388,7 @@ article.$put({
 
 #### $patch
 
-Same as $post / $put, but only passed property are updated.
+Same as $post / $put, but only passed properties are updated.
 
 #### $delete
 
@@ -323,7 +404,7 @@ article.$delete([ 'title', 'body' ])
 #### $check
 
 Static method. 
-Returns an array of potential errors if the payload where passed to the model.
+Returns an array of potential errors if a payload where passed to the model.
 
 ```javascript
 const errors = Article.$check(payload)
@@ -332,37 +413,26 @@ const errors = Article.$check(payload)
 #### $hydrate
 
 Static method. 
-Transforms a object or an array of objects into models.
+Turns an object or an array of objects into models.
 Useful with API responses.
 
 ```javascript
 fetch('https://api.com/post')
   .then(response => response.json())
   .then(response => Post.$hydrate(response))
-  .then(response) => { /* Array of hydrated models */ }
+  .then(response) => { /* Array of hydrated Post models */ }
 ```
-
-### Custom methods 
-
-Methods can be added to models.
 
 ```javascript
-const Article = SmartModel.create('Article', {
-  body: {
-    type: String
-  }
-}, {
-  methods: {
-    excerpt(limit = 10) {
-      return this.body.substr(0, limit) + '…'
-    }
-  }
-})
+fetch('https://api.com/post/1234')
+  .then(response => response.json())
+  .then(response => Post.$hydrate(response))
+  .then(response) => { /* Hydrated Post  model */ }
 ```
 
-## Callbacks
+## Hooks
 
-Models have some callbacks methods that are called when properties are set, get, updated or deleted.
+Hooks are triggered before and after properties are set, get, updated or deleted.
 
 ```javascript
 const User = SmartModel.create('User', {
@@ -371,12 +441,12 @@ const User = SmartModel.create('User', {
   }
 }, {
   methods: {
+    $onBeforeDelete() {}
     $onBeforeGet() {}
     $onBeforeSet() {}
     $onBeforeUpdate() {}
     $onDelete() {}
     $onGet() {}
-    $onBeforeDelete() {}
     $onSet() {}
     $onUpdate() {}
   }
