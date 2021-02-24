@@ -42,14 +42,14 @@ const terserBeautify = {
 
 const terserMinify = {
   mangle: {
-    toplevel: false
+    toplevel: true
   },
   compress: {
-    toplevel: false,
+    toplevel: true,
     reduce_funcs: true,
     keep_infinity: true,
     pure_getters: true,
-    passes: 10
+    passes: 3
   }
 }
 
@@ -59,6 +59,11 @@ formats.forEach((type) => {
   const postfix = format === 'iife' ? '' : '.' + format
   const postfixMin = minify ? '.min' : ''
   const filename = FILENAME + postfix + postfixMin + extension
+
+  if (format === 'iife' && minify) {
+    terserMinify.mangle.toplevel = false
+    terserMinify.compress.toplevel = false
+  }
 
   configs.push({
     input: SRC + '/index.js',
