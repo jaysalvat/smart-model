@@ -20,7 +20,7 @@ Javascript object model.
 - [x] Value content validation (required, custom rules)
 - [x] Default value
 - [x] Readonly properties
-- [x] Virtual property
+- [x] Computed property
 - [x] Throw exception (or not) if invalid
 - [x] Nested models
 - [x] Live cycle events
@@ -103,7 +103,7 @@ const Post = SmartModel.create('Post', {
         fullname: (author) => author.firstname + ' ' + author.lastname
       }
     },
-    // Virtual properties
+    // Computed properties
     bodyLength: (post) => post.body.length, 
     readingTime: (post) => readingTime(post.body)
   }, 
@@ -197,7 +197,8 @@ const Event = SmartModel.create('Event', {
 })
 ```
 
-** Use with caution **, it could be unexpected effects when object are copied (the formated value becomes the new value). 
+**Use with caution**, it could cause unexpected effects when object is used in other Proxies (like Vue).
+The formatted value becomes the new value of the object and formatting is applied twice.
 Consider using a computed property instead. 
 
 #### readonly

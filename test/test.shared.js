@@ -303,10 +303,10 @@ export default function test(expect, SmartModel) {
       })
     })
 
-    // Virtual / Readonly property
+    // Computed / Readonly property
 
-    describe('Virtual property', function () {
-      it('should get a virtual property', function () {
+    describe('Computed property', function () {
+      it('should get a computed property', function () {
         const Model = SmartModel.create('Model', {
           today: () => new Date()
         })
@@ -316,16 +316,16 @@ export default function test(expect, SmartModel) {
         expect(model.today.toString()).to.be.equal(new Date().toString())
       })
 
-      it('should get a virtual property with context', function () {
+      it('should get a computed property with context', function () {
         const Model = SmartModel.create('Model', {
           prop1: { default: 'string' },
-          prop2: (model) => 'virtual: ' + model.prop1
+          prop2: (model) => 'computed: ' + model.prop1
         })
 
         const model = new Model()
 
         expect(model.prop1).to.be.equal('string')
-        expect(model.prop2).to.be.equal('virtual: string')
+        expect(model.prop2).to.be.equal('computed: string')
       })
 
       it('should throw an exception if property is readonly', function () {
