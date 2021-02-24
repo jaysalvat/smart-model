@@ -197,8 +197,21 @@ const Event = SmartModel.create('Event', {
 })
 ```
 
-**Use with caution**, it could cause unexpected effects when object is used in other Proxies (like Vue).
-The formatted value becomes the new value of the object and formatting is applied twice.
+**Use with caution**, it could cause unexpected effects when the model is cloned.
+
+```javascript
+const cloned = Object.assign({}, model)
+```
+
+The formatted value becomes the new value of the cloned object.
+Consider using the `$get()` method instead. 
+
+```javascript
+const cloned = model.$get()
+```
+
+it could also cause unexpected effects when model is used in other Proxies (like Vue).
+The formatting could be applied multiple times.
 Consider using a computed property instead. 
 
 #### readonly
