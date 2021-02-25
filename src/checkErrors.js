@@ -21,7 +21,7 @@ export default function checkErrors(entry, property, value, first, settings) {
 
   if (entry.readonly && !first) {
     errors.push({
-      message: `Property '${property}' is 'readonly'`,
+      message: `Property "${property}" is "readonly"`,
       code: 'readonly'
     })
 
@@ -49,7 +49,7 @@ export default function checkErrors(entry, property, value, first, settings) {
 
       if (rule(value)) {
         errors.push({
-          message: `Property "${property}" breaks the "${key}" rule`,
+          message: `Property "${property}" triggers the "${key}" rule error`,
           code: 'rule:' + key
         })
       }
