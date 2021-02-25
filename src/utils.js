@@ -30,6 +30,10 @@ export function isPlainObject(value) {
   return value && value.toString() === '[object Object]'
 }
 
+export function isTypeArrayOfSmartModels(type) {
+  return isArray(type) && type.length === 1 && isSmartModel(type[0])
+}
+
 export function keys(obj, cb = function () { }) {
   return Object.keys(obj).map(cb)
 }

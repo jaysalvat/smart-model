@@ -436,7 +436,7 @@ export default function test(expect, SmartModel) {
             prop1: { default: 'string1' },
             prop2: {
               type: {
-                nestedProp: { default: 'string2' }
+                prop: { default: 'string2' }
               }
             }
           })
@@ -459,8 +459,8 @@ export default function test(expect, SmartModel) {
             prop2: { default: 'string2' },
             prop3: {
               type: {
-                nestedProp1: { default: 'string3' },
-                nestedProp2: { default: 'string4' }
+                prop1: { default: 'string3' },
+                prop2: { default: 'string4' }
               }
             }
           })
@@ -470,7 +470,7 @@ export default function test(expect, SmartModel) {
           model.$post({
             prop1: 'newString1',
             prop3: {
-              nestedProp1: 'newString2',
+              prop1: 'newString2',
               new: 'string'
             },
             new: 'string'
@@ -479,8 +479,8 @@ export default function test(expect, SmartModel) {
           expect(model.prop1).to.be.equal('newString1')
           expect(model.prop2).to.be.equal(undef)
           expect(model.new).to.be.equal('string')
-          expect(model.prop3.nestedProp1).to.be.equal('newString2')
-          expect(model.prop3.nestedProp2).to.be.equal(undef)
+          expect(model.prop3.prop1).to.be.equal('newString2')
+          expect(model.prop3.prop2).to.be.equal(undef)
           expect(model.prop3.new).to.be.equal('string')
         })
       })
@@ -492,8 +492,8 @@ export default function test(expect, SmartModel) {
             prop2: { default: 'string2' },
             prop3: {
               type: {
-                nestedProp1: { default: 'string3' },
-                nestedProp2: { default: 'string4' }
+                prop1: { default: 'string3' },
+                prop2: { default: 'string4' }
               }
             }
           })
@@ -503,7 +503,7 @@ export default function test(expect, SmartModel) {
           model.$patch({
             prop1: 'newString1',
             prop3: {
-              nestedProp1: 'newString2',
+              prop1: 'newString2',
               new: 'string'
             },
             new: 'string'
@@ -512,8 +512,8 @@ export default function test(expect, SmartModel) {
           expect(model.prop1).to.be.equal('newString1')
           expect(model.prop2).to.be.equal('string2')
           expect(model.new).to.be.equal('string')
-          expect(model.prop3.nestedProp1).to.be.equal('newString2')
-          expect(model.prop3.nestedProp2).to.be.equal('string4')
+          expect(model.prop3.prop1).to.be.equal('newString2')
+          expect(model.prop3.prop2).to.be.equal('string4')
           expect(model.prop3.new).to.be.equal('string')
         })
       })
@@ -855,7 +855,7 @@ export default function test(expect, SmartModel) {
     describe('Nested model', function () {
       it('should nest a child model with another model', function () {
         const SubModel = SmartModel.create('SubModel', {
-          nestedProp: {
+          prop: {
             default: 'string2'
           }
         })
@@ -870,7 +870,7 @@ export default function test(expect, SmartModel) {
         expect(model).to.be.an.instanceOf(SmartModel)
         expect(model.prop1).to.be.equal('string1')
         expect(model.prop2).to. be.an.instanceOf(SmartModel)
-        expect(model.prop2.nestedProp).to.be.equal('string2')
+        expect(model.prop2.prop).to.be.equal('string2')
       })
 
       it('should nest a child model with schema', function () {
@@ -880,7 +880,7 @@ export default function test(expect, SmartModel) {
           },
           prop2: {
             type: {
-              nestedProp: {
+              prop: {
                 default: 'string2'
               }
             }
@@ -891,14 +891,14 @@ export default function test(expect, SmartModel) {
 
         expect(model.prop1).to.be.equal('string1')
         expect(model.prop2).to.be.an.instanceOf(SmartModel)
-        expect(model.prop2.nestedProp).to.be.equal('string2')
+        expect(model.prop2.prop).to.be.equal('string2')
       })
 
       it('should nest a child model in a child model with schema', function () {
         const Model = SmartModel.create('Model', {
           prop: {
             type: {
-              nestedProp: {
+              prop: {
                 type: {
                   nestedNestedProp: {
                     default: 'string'
@@ -913,14 +913,14 @@ export default function test(expect, SmartModel) {
 
         expect(model).to.be.an.instanceOf(SmartModel)
         expect(model.prop).to.be.an.instanceOf(SmartModel)
-        expect(model.prop.nestedProp).to.be.an.instanceOf(SmartModel)
+        expect(model.prop.prop).to.be.an.instanceOf(SmartModel)
       })
 
       it('should nest a child model and init it properly', function () {
         const Model = SmartModel.create('Model', {
           prop: {
             type: {
-              nestedProp: {
+              prop: {
                 default: 'string'
               }
             }
@@ -931,7 +931,7 @@ export default function test(expect, SmartModel) {
           prop: {}
         })
 
-        expect(model.prop.nestedProp).to.be.equal('string')
+        expect(model.prop.prop).to.be.equal('string')
       })
 
       it('should throw an error if a required parent prop is not set on init', function () {
@@ -939,7 +939,7 @@ export default function test(expect, SmartModel) {
           prop: {
             required: true,
             type: {
-              nestedProp: {
+              prop: {
                 default: 'string'
               }
             }
@@ -959,7 +959,7 @@ export default function test(expect, SmartModel) {
         const Model = SmartModel.create('Model', {
           prop: {
             type: {
-              nestedProp: {}
+              prop: {}
             }
           }
         })
@@ -977,7 +977,7 @@ export default function test(expect, SmartModel) {
         const Model = SmartModel.create('Model', {
           prop: {
             type: {
-              nestedProp: {
+              prop: {
                 required: true
               }
             }
@@ -986,11 +986,11 @@ export default function test(expect, SmartModel) {
 
         const err = checkExceptions(() => {
           new Model({
-            prop: { nestedProp: null }
+            prop: { prop: null }
           })
         })
 
-        expect(err.property).to.be.equal('nestedProp')
+        expect(err.property).to.be.equal('prop')
         expect(err.source).to.be.equal('Prop')
         expect(err.code).to.be.equal('required')
       })
@@ -999,7 +999,7 @@ export default function test(expect, SmartModel) {
         const Model = SmartModel.create('Model', {
           prop: {
             type: {
-              nestedProp: {
+              prop: {
                 type: String
               }
             }
@@ -1009,12 +1009,38 @@ export default function test(expect, SmartModel) {
         const err = checkExceptions(() => {
           const model = new Model()
 
-          model.prop.nestedProp = 0
+          model.prop.prop = 0
         })
 
-        expect(err.property).to.be.equal('nestedProp')
+        expect(err.property).to.be.equal('prop')
         expect(err.source).to.be.equal('Prop')
         expect(err.code).to.be.equal('type')
+      })
+
+      it('should attach an array of models', function () {
+        const SubModel = SmartModel.create('SubModel', {
+          prop: {
+            default: 'string'
+          }
+        })
+
+        const Model = SmartModel.create('Model', {
+          prop: {
+            type: [ SubModel ]
+          }
+        })
+
+        const model = new Model({
+          prop: [
+            { prop: 'string1' },
+            { prop: 'string2' }
+          ]
+        })
+
+        expect(model.prop[0]).to.be.an.instanceOf(SmartModel)
+        expect(model.prop[1]).to.be.an.instanceOf(SmartModel)
+        expect(model.prop[0].prop).to.be.equal('string1')
+        expect(model.prop[1].prop).to.be.equal('string2')
       })
     })
   })

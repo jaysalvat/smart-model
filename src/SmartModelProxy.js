@@ -1,7 +1,7 @@
 import SmartModelError from './SmartModelError.js'
 import checkErrors from './checkErrors.js'
 import createNested from './createNested.js'
-import { keys, eject, isFn, isEqual, isUndef } from './utils.js'
+import { keys, eject, isFn, isTypeArrayOfSmartModels, isEqual, isUndef } from './utils.js'
 
 class SmartModelProxy {
   constructor(schema, settings) {
@@ -27,6 +27,11 @@ class SmartModelProxy {
 
         if (isFn(entry.transform)) {
           value = trigger(entry.transform, [ value, schema ])
+        }
+
+        if (isTypeArrayOfSmartModels(entry.type)) {
+          value = entry.type[0].$hydrate(value)
+          entry.type = Array
         }
 
         const errors = checkErrors(entry, property, value, first, settings)

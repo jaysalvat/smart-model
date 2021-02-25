@@ -3,7 +3,7 @@ import { keys, isSmartModel, toArray, checkType, isPlainObject } from './utils.j
 export default function checkErrors(entry, property, value, first, settings) {
   const errors = []
 
-  if (settings.strict && (!entry || !keys(entry).length)) {
+  if (settings.strict && !keys(entry || {}).length) {
     errors.push({
       message: `Property "${property}" can't be set in strict mode`,
       code: 'strict'

@@ -318,6 +318,35 @@ const Post = SmartModel.create('Post', {
 })
 ```
 
+An array of models can be attach to a property with this fancy syntax.
+
+```javascript
+const Article = SmartModel.create('Article', {
+  body: { 
+    type: String 
+  },
+  comments: {
+    type: [ Comment ]
+  }
+})
+```
+
+The syntax above is a shortcut for:
+
+```javascript
+const Article = SmartModel.create('Article', {
+  body: { 
+    type: String 
+  },
+  comments: {
+    type: Array,
+    transform: (value) => Comment.$hydrate(value)
+  }
+})
+```
+
+Now `comments` always is an array of `Comment` models.
+
 ### Settings
 
 | Option      | Type        | Default   | Description

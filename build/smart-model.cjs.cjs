@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.4.0 built 2021-02-24 12:33:33
+* @version 0.4.0 built 2021-02-25 08:01:06
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -34,6 +34,10 @@ function isSmartModel(value) {
 
 function isPlainObject(value) {
   return value && value.toString() === "[object Object]";
+}
+
+function isTypeArrayOfSmartModels(type) {
+  return isArray(type) && type.length === 1 && isSmartModel(type[0]);
 }
 
 function keys(obj, cb = function() {}) {
@@ -99,19 +103,20 @@ class SmartModelError extends Error {
 
 SmartModelError.throw = function(settings, code, message, property, source) {
   const shortCode = code.split(":")[0];
+  source = source && source.constructor.name;
   if (settings.exceptions === true || isPlainObject(settings.exceptions) && settings.exceptions[shortCode]) {
     throw new SmartModelError({
-      message: message,
+      message: `[${source}] ${message}`,
+      source: source,
       property: property,
-      code: code,
-      source: source && source.constructor.name
+      code: code
     });
   }
 };
 
 function checkErrors(entry, property, value, first, settings) {
   const errors = [];
-  if (settings.strict && (!entry || !keys(entry).length)) {
+  if (settings.strict && !keys(entry || {}).length) {
     errors.push({
       message: `Property "${property}" can't be set in strict mode`,
       code: "strict"
@@ -126,7 +131,7 @@ function checkErrors(entry, property, value, first, settings) {
   }
   if (entry.readonly && !first) {
     errors.push({
-      message: `Property '${property}' is 'readonly'`,
+      message: `Property "${property}" is "readonly"`,
       code: "readonly"
     });
     return errors;
@@ -149,7 +154,7 @@ function checkErrors(entry, property, value, first, settings) {
       const rule = entry.rule[key];
       if (rule(value)) {
         errors.push({
-          message: `Property "${property}" breaks the "${key}" rule`,
+          message: `Property "${property}" triggers the "${key}" rule error`,
           code: "rule:" + key
         });
       }
@@ -159,15 +164,14 @@ function checkErrors(entry, property, value, first, settings) {
 }
 
 function createNested(entry = {}, property, settings) {
-  if (!entry.type) {
-    return false;
-  }
-  const Child = isSmartModel(entry.type) ? entry.type : false;
-  const schema = isPlainObject(entry.type) ? entry.type : false;
-  if (Child || schema) {
-    const Model = Child ? Child : SmartModel.create(pascalCase(property), schema, settings);
-    entry.type = Model;
-    return Model;
+  if (entry.type) {
+    const Child = isSmartModel(entry.type) ? entry.type : false;
+    const schema = isPlainObject(entry.type) ? entry.type : false;
+    if (Child || schema) {
+      const Model = Child ? Child : SmartModel.create(pascalCase(property), schema, settings);
+      entry.type = Model;
+      return Model;
+    }
   }
   return false;
 }
@@ -191,6 +195,10 @@ class SmartModelProxy {
         }
         if (isFn(entry.transform)) {
           value = trigger(entry.transform, [ value, schema ]);
+        }
+        if (isTypeArrayOfSmartModels(entry.type)) {
+          value = entry.type[0].$hydrate(value);
+          entry.type = Array;
         }
         const errors = checkErrors(entry, property, value, first, settings);
         if (errors.length) {
