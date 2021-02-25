@@ -23,7 +23,7 @@ export function isClass(value) {
 }
 
 export function isSmartModel(value) {
-  return value.prototype instanceof SmartModel || value instanceof SmartModel
+  return value && (value.prototype instanceof SmartModel || value instanceof SmartModel)
 }
 
 export function isPlainObject(value) {

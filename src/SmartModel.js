@@ -29,27 +29,71 @@ class SmartModel extends SmartModelProxy {
     })
   }
 
-  $put(data) {
-    keys(this, (key) => {
-      if (data[key]) {
-        if (isSmartModel(this[key])) {
-          this[key].$put(data[key])
-        } else {
+  $post(data) {
+    const schema = this.$schema()
+
+    keys(schema, (key) => {
+      if (isUndef(data[key])) {
+        if (!isUndef(schema[key].default)) {
+          this[key] = schema[key].default
+        } else if (!isFn(schema[key])) {
           this[key] = data[key]
         }
+      } else if (isSmartModel(this[key])) {
+        this[key].$put(data[key])
       } else {
-        this.$delete(key)
-      }
-    })
-
-    keys(data, (key) => {
-      if (!this[key]) {
         this[key] = data[key]
       }
     })
+
+    // keys(this, (key) => {
+    //   if (!isUndef(data[key])) {
+    //     if (isSmartModel(this[key])) {
+    //       this[key].$put(data[key])
+    //     } else {
+    //       this[key] = data[key]
+    //     }
+    //   } else {
+    //     this[key] = data[key]
+    //   }
+    // })
+
+    keys(data, (key) => {
+      this[key] = data[key]
+    })
+
+    // keys(this, (key) => {
+    //   if (!isUndef(data[key])) {
+    //     if (isSmartModel(this[key])) {
+    //       this[key].$put(data[key])
+    //     } else {
+    //       this[key] = data[key]
+    //     }
+    //   } else {
+    //     this.$delete(key)
+    //   }
+    // })
+
+    // keys(schema, (key) => {
+    //   if (isUndef(data[key])) {
+    //     console.log('in', key)
+    //     if (!isUndef(schema[key].default)) {
+    //       console.log('def', schema[key].default)
+    //       this[key] = schema[key].default
+    //     } else if (!isFn(schema[key])) {
+    //       this[key] = data[key]
+    //     }
+    //   }
+    // })
+
+    // keys(data, (key) => {
+    //   if (!isUndef(this[key])) {
+    //     this[key] = data[key]
+    //   }
+    // })
   }
 
-  $post(data) {
+  $put(data) {
     return this.$put(data)
   }
 
@@ -89,7 +133,12 @@ SmartModel.create = function (name, schema, settings) {
     constructor(data) {
       super(schema, data, settings)
     }
-  } }[name]
+
+    $schema() {
+      return schema
+    }
+  }
+  }[name]
 
   Model.$check = function (payload, filters) {
     const invalidations = {}
@@ -131,8 +180,6 @@ SmartModel.create = function (name, schema, settings) {
   }
 
   Object.assign(Model.prototype, settings.methods)
-
-  Model.schema = schema
 
   return Model
 }

@@ -6,6 +6,7 @@ import { keys, eject, isFn, isTypeArrayOfSmartModels, isEqual, isUndef } from '.
 class SmartModelProxy {
   constructor(schema, settings) {
     return new Proxy(this, {
+
       set(target, property, value) {
         const entry = schema[property] || {}
         const old = target[property]
@@ -29,7 +30,7 @@ class SmartModelProxy {
           value = trigger(entry.transform, [ value, schema ])
         }
 
-        if (isTypeArrayOfSmartModels(entry.type)) {
+        if (isTypeArrayOfSmartModels(entry.type) && !isUndef(value)) {
           value = entry.type[0].$hydrate(value)
           entry.type = Array
         }
@@ -48,7 +49,7 @@ class SmartModelProxy {
           return true
         }
 
-        if (Nested) {
+        if (Nested && !isUndef(value)) {
           value = new Nested(value)
         }
 

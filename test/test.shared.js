@@ -431,22 +431,30 @@ export default function test(expect, SmartModel) {
 
     describe('Methods', function () {
       describe('$get', function () {
-        it('should works', function () {
+        it('should eject data model as standard JSON', function () {
           const Model = SmartModel.create('Model', {
             prop1: { default: 'string1' },
             prop2: {
               type: {
                 prop: { default: 'string2' }
               }
+            },
+            prop3: {
+              type: {
+                prop: { default: 'string3' }
+              }
             }
           })
 
-          const model = new Model()
+          const model = new Model({
+            prop2: {}
+          })
           const obj = model.$get()
 
           expect(JSON.stringify(obj)).to.be.deep.equal(JSON.stringify(model))
           expect(model).to.be.instanceOf(SmartModel)
           expect(model.prop2).to.be.instanceOf(SmartModel)
+          expect(model.prop3).to.not.be.instanceOf(SmartModel)
           expect(obj).to.not.be.instanceOf(SmartModel)
           expect(obj.prop2).to.not.be.instanceOf(SmartModel)
         })
@@ -462,10 +470,15 @@ export default function test(expect, SmartModel) {
                 prop1: { default: 'string3' },
                 prop2: { default: 'string4' }
               }
+            },
+            prop4: {
+              type: String
             }
           })
 
-          const model = new Model()
+          const model = new Model({
+            prop4: 'string5'
+          })
 
           model.$post({
             prop1: 'newString1',
@@ -477,11 +490,12 @@ export default function test(expect, SmartModel) {
           })
 
           expect(model.prop1).to.be.equal('newString1')
-          expect(model.prop2).to.be.equal(undef)
+          expect(model.prop2).to.be.equal('string2')
           expect(model.new).to.be.equal('string')
           expect(model.prop3.prop1).to.be.equal('newString2')
-          expect(model.prop3.prop2).to.be.equal(undef)
+          expect(model.prop3.prop2).to.be.equal('string4')
           expect(model.prop3.new).to.be.equal('string')
+          expect(model.prop4).to.be.equal(undef)
         })
       })
 
@@ -862,7 +876,7 @@ export default function test(expect, SmartModel) {
 
         const Model = SmartModel.create('Model', {
           prop1: { default: 'string1' },
-          prop2: { type: SubModel }
+          prop2: { default: {}, type: SubModel }
         })
 
         const model = new Model()
@@ -879,6 +893,7 @@ export default function test(expect, SmartModel) {
             default: 'string1'
           },
           prop2: {
+            default: {},
             type: {
               prop: {
                 default: 'string2'
@@ -897,8 +912,10 @@ export default function test(expect, SmartModel) {
       it('should nest a child model in a child model with schema', function () {
         const Model = SmartModel.create('Model', {
           prop: {
+            default: {},
             type: {
               prop: {
+                default: {},
                 type: {
                   nestedNestedProp: {
                     default: 'string'
@@ -998,6 +1015,7 @@ export default function test(expect, SmartModel) {
       it('should throw an error if a typed nested prop is not set properly', function () {
         const Model = SmartModel.create('Model', {
           prop: {
+            default: {},
             type: {
               prop: {
                 type: String
