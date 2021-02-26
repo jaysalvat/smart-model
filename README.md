@@ -403,7 +403,7 @@ const Article = SmartModel.create('Article', {
 })
 ```
 
-### Native methods 
+### Methods 
 
 #### $get
 
@@ -443,6 +443,28 @@ const article = new Article()
 
 article.$delete([ 'title', 'body' ])
 ```
+
+#### $subscribe()
+
+Adds an update listener. It will be called any time a value is updated.
+
+```javascript
+article.$subscribe((property, value) => {
+  console.log(property, 'has been updated with', value)
+})
+```
+
+To unsubscribe the change listener, invoke the function returned by subscribe.
+
+```javascript
+const unsubscribe = article.$subscribe((property, value) => {
+  console.log(property, 'has been updated with', value)
+})
+
+unsubscribe()
+```
+
+## Static methods
 
 #### $check
 

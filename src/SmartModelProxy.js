@@ -59,6 +59,8 @@ class SmartModelProxy {
 
         if (updated) {
           trigger(target.$onUpdate)
+
+          target.$applySubscribers(property, value)
         }
 
         return true
@@ -117,6 +119,8 @@ class SmartModelProxy {
 
         trigger(target.$onDelete)
         trigger(target.$onUpdate)
+
+        target.$applySubscribers(property, value)
 
         return true
       }

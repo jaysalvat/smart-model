@@ -46,51 +46,9 @@ class SmartModel extends SmartModelProxy {
       }
     })
 
-    // keys(this, (key) => {
-    //   if (!isUndef(data[key])) {
-    //     if (isSmartModel(this[key])) {
-    //       this[key].$put(data[key])
-    //     } else {
-    //       this[key] = data[key]
-    //     }
-    //   } else {
-    //     this[key] = data[key]
-    //   }
-    // })
-
     keys(data, (key) => {
       this[key] = data[key]
     })
-
-    // keys(this, (key) => {
-    //   if (!isUndef(data[key])) {
-    //     if (isSmartModel(this[key])) {
-    //       this[key].$put(data[key])
-    //     } else {
-    //       this[key] = data[key]
-    //     }
-    //   } else {
-    //     this.$delete(key)
-    //   }
-    // })
-
-    // keys(schema, (key) => {
-    //   if (isUndef(data[key])) {
-    //     console.log('in', key)
-    //     if (!isUndef(schema[key].default)) {
-    //       console.log('def', schema[key].default)
-    //       this[key] = schema[key].default
-    //     } else if (!isFn(schema[key])) {
-    //       this[key] = data[key]
-    //     }
-    //   }
-    // })
-
-    // keys(data, (key) => {
-    //   if (!isUndef(this[key])) {
-    //     this[key] = data[key]
-    //   }
-    // })
   }
 
   $put(data) {
@@ -101,6 +59,14 @@ class SmartModel extends SmartModelProxy {
     toArray(properties).forEach((key) => {
       Reflect.deleteProperty(this, key)
     })
+  }
+
+  $subscribe(fn) {
+    this.$subscribers().push(fn)
+
+    return () => {
+      this.$subscribers(fn)
+    }
   }
 }
 
@@ -127,6 +93,8 @@ SmartModel.settings = {
 }
 
 SmartModel.create = function (name, schema, settings) {
+  let subscribers = []
+
   settings = merge(SmartModel.settings, settings)
 
   const Model = { [name]: class extends SmartModel {
@@ -137,10 +105,24 @@ SmartModel.create = function (name, schema, settings) {
     $schema() {
       return schema
     }
+
+    $subscribers(removedFn) {
+      if (removedFn) {
+        subscribers = subscribers.filter((fn) => fn !== removedFn)
+      }
+
+      return subscribers
+    }
+
+    $applySubscribers(property, value) {
+      keys(subscribers, (sub) => {
+        Reflect.apply(subscribers[sub], this, [ property, value, this ])
+      })
+    }
   }
   }[name]
 
-  Model.$check = function (payload, filters) {
+  Model.$check = function (payload = {}, filters) {
     const invalidations = {}
 
     keys(schema, (property) => {

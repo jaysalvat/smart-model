@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.5.0 built 2021-02-25 09:18:46
+* @version 0.5.0 built 2021-02-26 06:31:15
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -29,7 +29,7 @@ function isClass(value) {
 }
 
 function isSmartModel(value) {
-  return value.prototype instanceof SmartModel || value instanceof SmartModel;
+  return value && (value.prototype instanceof SmartModel || value instanceof SmartModel);
 }
 
 function isPlainObject(value) {
@@ -196,7 +196,7 @@ class SmartModelProxy {
         if (isFn(entry.transform)) {
           value = trigger(entry.transform, [ value, schema ]);
         }
-        if (isTypeArrayOfSmartModels(entry.type)) {
+        if (isTypeArrayOfSmartModels(entry.type) && !isUndef(value)) {
           value = entry.type[0].$hydrate(value);
           entry.type = Array;
         }
@@ -211,13 +211,14 @@ class SmartModelProxy {
         if (settings.strict && !keys(entry).length) {
           return true;
         }
-        if (Nested) {
+        if (Nested && !isUndef(value)) {
           value = new Nested(value);
         }
         target[property] = value;
         trigger(target.$onSet);
         if (updated) {
           trigger(target.$onUpdate);
+          target.$applySubscribers(property, value);
         }
         return true;
       },
@@ -259,6 +260,7 @@ class SmartModelProxy {
         Reflect.deleteProperty(target, property);
         trigger(target.$onDelete);
         trigger(target.$onUpdate);
+        target.$applySubscribers(property, value);
         return true;
       }
     });
@@ -284,31 +286,38 @@ class SmartModel extends SmartModelProxy {
       this[key] = data[key];
     }));
   }
-  $put(data) {
-    keys(this, (key => {
-      if (data[key]) {
-        if (isSmartModel(this[key])) {
-          this[key].$put(data[key]);
-        } else {
+  $post(data) {
+    const schema = this.$schema();
+    keys(schema, (key => {
+      if (isUndef(data[key])) {
+        if (!isUndef(schema[key].default)) {
+          this[key] = schema[key].default;
+        } else if (!isFn(schema[key])) {
           this[key] = data[key];
         }
+      } else if (isSmartModel(this[key])) {
+        this[key].$put(data[key]);
       } else {
-        this.$delete(key);
-      }
-    }));
-    keys(data, (key => {
-      if (!this[key]) {
         this[key] = data[key];
       }
     }));
+    keys(data, (key => {
+      this[key] = data[key];
+    }));
   }
-  $post(data) {
+  $put(data) {
     return this.$put(data);
   }
   $delete(properties) {
     toArray(properties).forEach((key => {
       Reflect.deleteProperty(this, key);
     }));
+  }
+  $subscribe(fn) {
+    this.$subscribers().push(fn);
+    return () => {
+      this.$subscribers(fn);
+    };
   }
 }
 
@@ -335,15 +344,30 @@ SmartModel.settings = {
 };
 
 SmartModel.create = function(name, schema, settings) {
+  let subscribers = [];
   settings = merge(SmartModel.settings, settings);
   const Model = {
     [name]: class extends SmartModel {
       constructor(data) {
         super(schema, data, settings);
       }
+      $schema() {
+        return schema;
+      }
+      $subscribers(removedFn) {
+        if (removedFn) {
+          subscribers = subscribers.filter((fn => fn !== removedFn));
+        }
+        return subscribers;
+      }
+      $applySubscribers(property, value) {
+        keys(subscribers, (sub => {
+          Reflect.apply(subscribers[sub], this, [ property, value, this ]);
+        }));
+      }
     }
   }[name];
-  Model.$check = function(payload, filters) {
+  Model.$check = function(payload = {}, filters) {
     const invalidations = {};
     keys(schema, (property => {
       let subErrors;
@@ -375,7 +399,6 @@ SmartModel.create = function(name, schema, settings) {
     }
   };
   Object.assign(Model.prototype, settings.methods);
-  Model.schema = schema;
   return Model;
 };
 

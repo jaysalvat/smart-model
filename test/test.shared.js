@@ -563,6 +563,64 @@ export default function test(expect, SmartModel) {
           expect(model).not.have.own.property('prop3')
         })
       })
+
+      describe('$subscribe', function () {
+        it('should call subscribersa', function () {
+          const properties = []
+          const values = []
+
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string' },
+            prop2: { default: 'string' },
+            prop3: { default: 'string' }
+          })
+
+          const model = new Model()
+
+          model.$subscribe((property) => {
+            properties.push(property)
+          })
+
+          model.$subscribe((_, value) => {
+            values.push(value)
+          })
+
+          model.prop1 = 'new string1'
+          model.prop2 = 'new string2'
+
+          expect(properties).to.have.all.members([ 'prop1', 'prop2' ])
+          expect(values).to.have.all.members([ 'new string1', 'new string2' ])
+        })
+
+        it('should remove subscribersa', function () {
+          const properties = []
+          const values = []
+
+          const Model = SmartModel.create('Model', {
+            prop1: { default: 'string' },
+            prop2: { default: 'string' }
+          })
+
+          const model = new Model()
+
+          const unsub1 = model.$subscribe((property) => {
+            properties.push(property)
+          })
+
+          const unsub2 = model.$subscribe((_, value) => {
+            values.push(value)
+          })
+
+          unsub1()
+          unsub2()
+
+          model.prop1 = 'new string1'
+          model.prop2 = 'new string2'
+
+          expect(properties.length).to.be.equal(0)
+          expect(values.length).to.be.equal(0)
+        })
+      })
     })
 
     describe('Static methods', function () {
