@@ -33,7 +33,8 @@ It tends to bring useful tools and best practices to Javascript data objects.
 Should works on modern browsers. 
 [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html) on your browser.
 
-SmartModel uses javascript proxy. It unfortunately makes it **incompatible with VueJs** reactive properties.
+SmartModel uses javascript proxy. 
+It unfortunately makes it **incompatible with some reactive front frameworks** (VueJs).
 
 ## Install
 
@@ -124,6 +125,8 @@ export default SmartModel.create('Post', {
 ```
 
 ```javascript
+import Post from './models/Post.js'
+
 const post = new Post({
   title: 'My new post',
   body: 'Very long post...',
