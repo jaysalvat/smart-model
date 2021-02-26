@@ -66,7 +66,7 @@ import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/sm
 ```javascript
 import readingTime from 'readingTime'
 
-export default Post = SmartModel.create('Post', {
+export default SmartModel.create('Post', {
   title: {
     required: true,
     type: String
