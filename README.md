@@ -69,61 +69,60 @@ Better documentation soon...
 function readingTime(text) { /*...*/ }
 
 const Post = SmartModel.create('Post', {
-    title: {
-      required: true,
-      type: String,
-    },
-    body: {
-      required: true,
-      type: String,
-      rule: {
-        'tooShort': (value) => value.length < 100,
-        'tooLong': (value) => value.length > 1000,
-      }
-    },
-    createdAt: {
-      type: Date,
-      default: new Date(),
-      transform: (value) => new Date(value),
-      format: (value) => value.toLocaleString()
-    },
-    updatedAt: {
-      type: Date,
-      default: new Date(),
-      transform: (value) => new Date(value),
-      format: (value) => value.toLocaleString()
-    },
-    // Nested model
-    author: {
-      required: true,
-      type: {
-        firstname: {
-          required: true,
-          type: String
-        },
-        lastname: {
-          required: true,
-          type: String,
-          transform: (value) => value.toUpperCase()
-        },
-        fullname: (author) => author.firstname + ' ' + author.lastname
-      }
-    },
-    // Computed properties
-    bodyLength: (post) => post.body.length, 
-    readingTime: (post) => readingTime(post.body)
-  }, 
-  // Settings
-  {
-    strict: true,
-    exceptions: true,
-    methods: {
-      $onUpdate() {
-        this.updatedAt = new Date()
-      }
+  title: {
+    required: true,
+    type: String
+  },
+  body: {
+    required: true,
+    type: String,
+    rule: {
+      tooShort: (value) => value.length < 100,
+      tooLong: (value) => value.length > 1000
+    }
+  },
+  createdAt: {
+    type: Date,
+    default: new Date(),
+    transform: (value) => new Date(value),
+    format: (value) => value.toLocaleString()
+  },
+  updatedAt: {
+    type: Date,
+    default: new Date(),
+    transform: (value) => new Date(value),
+    format: (value) => value.toLocaleString()
+  },
+  // Nested model
+  author: {
+    required: true,
+    type: {
+      firstname: {
+        required: true,
+        type: String
+      },
+      lastname: {
+        required: true,
+        type: String,
+        transform: (value) => value.toUpperCase()
+      },
+      fullname: (author) => author.firstname + ' ' + author.lastname
+    }
+  },
+  // Computed properties
+  bodyLength: (post) => post.body.length,
+  readingTime: (post) => readingTime(post.body)
+},
+// Settings
+{
+  strict: true,
+  exceptions: true,
+  methods: {
+    $onUpdate() {
+      this.updatedAt = new Date()
     }
   }
-)
+})
 ```
 
 ```javascript
