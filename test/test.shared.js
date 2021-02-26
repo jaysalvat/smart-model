@@ -477,7 +477,8 @@ export default function test(expect, SmartModel) {
           })
 
           const model = new Model({
-            prop4: 'string5'
+            prop4: 'string5',
+            unregistred: 'unregistred'
           })
 
           model.$post({
@@ -496,6 +497,7 @@ export default function test(expect, SmartModel) {
           expect(model.prop3.prop2).to.be.equal('string4')
           expect(model.prop3.new).to.be.equal('string')
           expect(model.prop4).to.be.equal(undef)
+          expect(model.unregistred).to.be.equal(undef)
         })
       })
 

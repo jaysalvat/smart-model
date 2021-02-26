@@ -2,23 +2,13 @@
 import SmartModelProxy from './SmartModelProxy.js'
 import createNested from './createNested.js'
 import checkErrors from './checkErrors.js'
-import { toArray, keys, merge, isSmartModel, isFn, isArray, isUndef } from './utils.js'
+import { toArray, keys, merge, isArray, isUndef } from './utils.js'
 
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings)
 
-    keys(schema, (key) => {
-      if (isUndef(data[key])) {
-        if (!isUndef(schema[key].default)) {
-          this[key] = schema[key].default
-        } else if (!isFn(schema[key])) {
-          this[key] = data[key]
-        }
-      }
-    })
-
-    this.$patch(data)
+    this.$post(data)
   }
 
   // Virtual $get
@@ -30,29 +20,30 @@ class SmartModel extends SmartModelProxy {
   }
 
   $post(data) {
+    let undef
     const schema = this.$schema()
 
     keys(schema, (key) => {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default
-        } else if (!isFn(schema[key])) {
-          this[key] = data[key]
+        } else {
+          this[key] = undef
         }
-      } else if (isSmartModel(this[key])) {
-        this[key].$put(data[key])
-      } else {
-        this[key] = data[key]
       }
     })
 
-    keys(data, (key) => {
-      this[key] = data[key]
+    keys(this, (key) => {
+      if (isUndef(schema[key] && isUndef(data[key]))) {
+        this.$delete(key)
+      }
     })
+
+    this.$patch(data)
   }
 
   $put(data) {
-    return this.$put(data)
+    return this.$post(data)
   }
 
   $delete(properties) {

@@ -13,7 +13,7 @@ SmartModel
 
 Javascript object model.
 
-- [x] ~1.5Kb gzipped
+- [x] <2Kb gzipped
 - [x] Value transformation
 - [x] Value format
 - [x] Value type validation

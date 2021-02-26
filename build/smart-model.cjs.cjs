@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.5.0 built 2021-02-26 06:31:15
+* @version 0.5.0 built 2021-02-26 07:33:39
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -270,16 +270,7 @@ class SmartModelProxy {
 class SmartModel extends SmartModelProxy {
   constructor(schema = {}, data = {}, settings) {
     super(schema, settings);
-    keys(schema, (key => {
-      if (isUndef(data[key])) {
-        if (!isUndef(schema[key].default)) {
-          this[key] = schema[key].default;
-        } else if (!isFn(schema[key])) {
-          this[key] = data[key];
-        }
-      }
-    }));
-    this.$patch(data);
+    this.$post(data);
   }
   $patch(data) {
     keys(data, (key => {
@@ -287,26 +278,26 @@ class SmartModel extends SmartModelProxy {
     }));
   }
   $post(data) {
+    let undef;
     const schema = this.$schema();
     keys(schema, (key => {
       if (isUndef(data[key])) {
         if (!isUndef(schema[key].default)) {
           this[key] = schema[key].default;
-        } else if (!isFn(schema[key])) {
-          this[key] = data[key];
+        } else {
+          this[key] = undef;
         }
-      } else if (isSmartModel(this[key])) {
-        this[key].$put(data[key]);
-      } else {
-        this[key] = data[key];
       }
     }));
-    keys(data, (key => {
-      this[key] = data[key];
+    keys(this, (key => {
+      if (isUndef(schema[key] && isUndef(data[key]))) {
+        this.$delete(key);
+      }
     }));
+    this.$patch(data);
   }
   $put(data) {
-    return this.$put(data);
+    return this.$post(data);
   }
   $delete(properties) {
     toArray(properties).forEach((key => {
