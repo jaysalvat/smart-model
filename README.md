@@ -136,9 +136,7 @@ const post = new Post({
 })
 ```
 
-```javascript
-console.log(post)
-```
+A `console.log(post)` returns
 
 ```
 Post {
