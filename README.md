@@ -64,7 +64,7 @@ import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/sm
 ## Usage
 
 ```javascript
-function readingTime(text) { /*...*/ }
+import readingTime from 'readingTime'
 
 const Post = SmartModel.create('Post', {
   title: {
