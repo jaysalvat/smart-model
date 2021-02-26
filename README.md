@@ -506,7 +506,7 @@ fetch('https://api.com/post')
 fetch('https://api.com/post/1234')
   .then(response => response.json())
   .then(response => Post.$hydrate(response))
-  .then(response) => { /* Hydrated Post  model */ }
+  .then(response) => { /* Hydrated Post model */ }
 ```
 
 ## Hooks
