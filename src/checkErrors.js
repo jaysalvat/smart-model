@@ -44,9 +44,7 @@ export default function checkErrors(entry, property, value, first, settings) {
   }
 
   if (entry.rule) {
-    keys(entry.rule, (key) => {
-      const rule = entry.rule[key]
-
+    keys(entry.rule, (key, rule) => {
       if (rule(value)) {
         errors.push({
           message: `Property "${property}" triggers the "${key}" rule error`,

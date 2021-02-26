@@ -425,6 +425,24 @@ export default function test(expect, SmartModel) {
         expect(model.prop).to.be.equal('INTERCEPTED')
         expect(isIntercepted).to.be.equal(true)
       })
+
+      it('should intercept delete', () => {
+        const Model = SmartModel.create('Model', {
+          prop: { default: 'string' }
+        }, {
+          methods: {
+            $onBeforeDelete() {
+              return false
+            }
+          }
+        })
+
+        const model = new Model()
+
+        delete model.prop
+
+        expect(model.prop).to.be.equal('string')
+      })
     })
 
     // Methods

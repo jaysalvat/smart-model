@@ -23,18 +23,18 @@ class SmartModel extends SmartModelProxy {
     let undef
     const schema = this.$schema()
 
-    keys(schema, (key) => {
+    keys(schema, (key, value) => {
       if (isUndef(data[key])) {
-        if (!isUndef(schema[key].default)) {
-          this[key] = schema[key].default
+        if (!isUndef(value.default)) {
+          this[key] = value.default
         } else {
           this[key] = undef
         }
       }
     })
 
-    keys(this, (key) => {
-      if (isUndef(schema[key] && isUndef(data[key]))) {
+    keys(this, (key, value) => {
+      if (isUndef(schema[key] && isUndef(value))) {
         this.$delete(key)
       }
     })
@@ -106,8 +106,8 @@ SmartModel.create = function (name, schema, settings) {
     }
 
     $applySubscribers(property, value) {
-      keys(subscribers, (sub) => {
-        Reflect.apply(subscribers[sub], this, [ property, value, this ])
+      keys(subscribers, (_, subscriber) => {
+        Reflect.apply(subscriber, this, [ property, value, this ])
       })
     }
   }
@@ -116,10 +116,9 @@ SmartModel.create = function (name, schema, settings) {
   Model.$check = function (payload = {}, filters) {
     const invalidations = {}
 
-    keys(schema, (property) => {
+    keys(schema, (property, entry) => {
       let subErrors
       const value = payload[property]
-      const entry = schema[property]
       const Nested = createNested(entry, property, settings)
 
       if (Nested) {

@@ -23,7 +23,6 @@ const bannerMinify = `/*! ${NAME} v${pkg.version} */`
 const bannerBeautify = `
 /**!
 * ${NAME}
-* ${pkg.description}
 * https://github.com/jaysalvat/${FILENAME}
 * @version ${pkg.version} built ${DATE}
 * @license ${pkg.license}

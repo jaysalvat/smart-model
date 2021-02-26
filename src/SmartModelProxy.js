@@ -113,7 +113,9 @@ class SmartModelProxy {
           SmartModelError.throw(settings, 'required', `Property "${property}" is "required"`, property, target)
         }
 
-        trigger(target.$onBeforeDelete)
+        if (trigger(target.$onBeforeDelete) === false) {
+          return true
+        }
 
         Reflect.deleteProperty(target, property)
 

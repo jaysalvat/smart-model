@@ -2,7 +2,7 @@
 * SmartModel
 * Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.5.0 built 2021-02-26 07:33:39
+* @version 0.5.0 built 2021-02-26 07:40:41
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -41,7 +41,7 @@ function isTypeArrayOfSmartModels(type) {
 }
 
 function keys(obj, cb = function() {}) {
-  return Object.keys(obj).map(cb);
+  return Object.keys(obj).map((key => cb(key, obj[key])));
 }
 
 function toArray(value) {
@@ -150,8 +150,7 @@ function checkErrors(entry, property, value, first, settings) {
     }
   }
   if (entry.rule) {
-    keys(entry.rule, (key => {
-      const rule = entry.rule[key];
+    keys(entry.rule, ((key, rule) => {
       if (rule(value)) {
         errors.push({
           message: `Property "${property}" triggers the "${key}" rule error`,
@@ -280,17 +279,17 @@ class SmartModel extends SmartModelProxy {
   $post(data) {
     let undef;
     const schema = this.$schema();
-    keys(schema, (key => {
+    keys(schema, ((key, value) => {
       if (isUndef(data[key])) {
-        if (!isUndef(schema[key].default)) {
-          this[key] = schema[key].default;
+        if (!isUndef(value.default)) {
+          this[key] = value.default;
         } else {
           this[key] = undef;
         }
       }
     }));
-    keys(this, (key => {
-      if (isUndef(schema[key] && isUndef(data[key]))) {
+    keys(this, ((key, value) => {
+      if (isUndef(schema[key] && isUndef(value))) {
         this.$delete(key);
       }
     }));
@@ -352,18 +351,17 @@ SmartModel.create = function(name, schema, settings) {
         return subscribers;
       }
       $applySubscribers(property, value) {
-        keys(subscribers, (sub => {
-          Reflect.apply(subscribers[sub], this, [ property, value, this ]);
+        keys(subscribers, ((_, subscriber) => {
+          Reflect.apply(subscriber, this, [ property, value, this ]);
         }));
       }
     }
   }[name];
   Model.$check = function(payload = {}, filters) {
     const invalidations = {};
-    keys(schema, (property => {
+    keys(schema, ((property, entry) => {
       let subErrors;
       const value = payload[property];
-      const entry = schema[property];
       const Nested = createNested(entry, property, settings);
       if (Nested) {
         subErrors = Nested.$check(value, filters);

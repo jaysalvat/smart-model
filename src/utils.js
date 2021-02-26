@@ -34,8 +34,8 @@ export function isTypeArrayOfSmartModels(type) {
   return isArray(type) && type.length === 1 && isSmartModel(type[0])
 }
 
-export function keys(obj, cb = function () { }) {
-  return Object.keys(obj).map(cb)
+export function keys(obj, cb = function () {}) {
+  return Object.keys(obj).map((key) => cb(key, obj[key]))
 }
 
 export function toArray(value) {
