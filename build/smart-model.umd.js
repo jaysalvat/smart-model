@@ -1,8 +1,7 @@
 /**!
 * SmartModel
-* Javascript object model
 * https://github.com/jaysalvat/smart-model
-* @version 0.5.0 built 2021-02-26 07:40:41
+* @version 0.6.0 built 2021-02-26 08:03:42
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
@@ -240,7 +239,9 @@
           if (entry.required) {
             SmartModelError.throw(settings, "required", `Property "${property}" is "required"`, property, target);
           }
-          trigger(target.$onBeforeDelete);
+          if (trigger(target.$onBeforeDelete) === false) {
+            return true;
+          }
           Reflect.deleteProperty(target, property);
           trigger(target.$onDelete);
           trigger(target.$onUpdate);
