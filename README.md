@@ -136,7 +136,7 @@ const post = new Post({
 })
 ```
 
-A `console.log(post)` returns
+Try a `console.log(post)`
 
 ```
 Post {
@@ -151,13 +151,17 @@ Post {
 }
 ```
 
+Let's try to log some other magic properties
+
 ```javascript
 console.log(post.author.fullname)
 console.log(post.createdAt)
 console.log(post.readingTime)
 ```
 
-```ssh
+They return
+
+```
 James HETFIELD
 01/31/2020, 9:50:00 AM
 12 minutes
