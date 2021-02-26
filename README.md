@@ -140,7 +140,7 @@ const post = new Post({
 console.log(post)
 ```
 
-```javascript
+```
 Post {
   createdAt: 2020-01-31T09:50:00.000Z,
   updatedAt: 2020-01-31T09:50:00.000Z,
