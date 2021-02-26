@@ -485,7 +485,7 @@ unsubscribe()
 #### $check
 
 Static method. 
-Returns an array of potential errors if a payload where passed to the model.
+Returns an array of potential errors if a payload was passed to the model.
 
 ```javascript
 const errors = Article.$check(payload)
