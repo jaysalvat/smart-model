@@ -11,9 +11,11 @@
 SmartModel
 ==========
 
-SmartModel is a fun experiment over Javascript Proxy. It tends to bring useful tools and best practices to data objects.
+SmartModel is a fun experiment over ES6 Javascript Proxy. 
 
-- [x] Small footprint, <2Kb gzipped
+It tends to bring useful tools and best practices to data objects.
+
+- [x] Small footprint <2Kb gzipped
 - [x] Value transformation
 - [x] Value formatting
 - [x] Value type validation
@@ -26,10 +28,12 @@ SmartModel is a fun experiment over Javascript Proxy. It tends to bring useful t
 - [x] Live cycle callbacks
 - [x] Subscriptions
 
-**Important note** SmartModel uses javascript proxy. It unfortunately makes it incompatible with VueJs reactive properties.
+### Compatibility
 
-Works on modern browsers. 
+Should works on modern browsers. 
 [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html) on your browser.
+
+SmartModel uses javascript proxy. It unfortunately makes it **incompatible with VueJs** reactive properties.
 
 ## Install
 
