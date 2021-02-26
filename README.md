@@ -25,7 +25,7 @@ It tends to bring useful tools and best practices to Javascript data objects.
 - [x] Computed properties
 - [x] Exceptions (or not) if invalid
 - [x] Nested models
-- [x] Live cycle callbacks
+- [x] Hooks
 - [x] Subscriptions
 
 ### Compatibility
