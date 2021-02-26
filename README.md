@@ -460,7 +460,7 @@ const article = new Article()
 article.$delete([ 'title', 'body' ])
 ```
 
-#### $subscribe()
+#### $subscribe
 
 Adds an update listener. It will be called any time a value is updated.
 
