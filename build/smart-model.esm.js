@@ -1,7 +1,7 @@
 /**!
 * SmartModel
 * https://github.com/jaysalvat/smart-model
-* @version 0.6.1 built 2021-02-26 08:19:29
+* @version 0.6.2 built 2021-02-26 08:21:37
 * @license ISC
 * @author Jay Salvat http://jaysalvat.com
 */
