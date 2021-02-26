@@ -63,8 +63,6 @@ import SmartModel from 'https://unpkg.com/@jaysalvat/smart-model@latest/build/sm
 
 ## Usage
 
-Better documentation soon...
-
 ```javascript
 function readingTime(text) { /*...*/ }
 
