@@ -11,20 +11,22 @@
 SmartModel
 ==========
 
-Javascript object model.
+SmartModel is a fun experiment over Javascript Proxy. It tends to bring useful tools and best practices to data objects.
 
-- [x] <2Kb gzipped
+- [x] Small footprint, <2Kb gzipped
 - [x] Value transformation
-- [x] Value format
+- [x] Value formatting
 - [x] Value type validation
-- [x] Value content validation (required, custom rules)
+- [x] Value content validation
 - [x] Default value
 - [x] Readonly properties
-- [x] Computed property
-- [x] Throw exception (or not) if invalid
+- [x] Computed properties
+- [x] Exceptions (or not) if invalid
 - [x] Nested models
-- [x] Live cycle events
-- [ ] Better documentation ^^
+- [x] Live cycle callbacks
+- [x] Subscriptions
+
+**Important note** SmartModel uses javascript proxy. It unfortunately makes it incompatible with VueJs reactive properties.
 
 Works on modern browsers. 
 [Check if tests pass](https://unpkg.com/@jaysalvat/smart-model@latest/test/index.html) on your browser.
@@ -200,19 +202,29 @@ const Event = SmartModel.create('Event', {
 **Use with caution**, it could cause unexpected effects when the model is cloned.
 
 ```javascript
-const cloned = Object.assign({}, model)
+const clonedObject = Object.assign({}, model)
 ```
 
 The formatted value becomes the new value of the cloned object.
 Consider using the `$get()` method instead. 
 
 ```javascript
-const cloned = model.$get()
+const clonedObject = model.$get()
 ```
 
-it could also cause unexpected effects when model is used in other Proxies (like Vue).
-The formatting could be applied multiple times.
-Consider using a computed property instead. 
+Or consider using a computed property. 
+
+```javascript
+const Event = SmartModel.create('Event', {
+  name: { 
+    type: String 
+  },
+  date: {
+    type Date,
+  },
+  formattedDate: (value) => new Date(value).toLocaleString()
+})
+```
 
 #### readonly
 
