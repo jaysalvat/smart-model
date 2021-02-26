@@ -117,7 +117,6 @@ const Post = SmartModel.create('Post', {
   {
     strict: true,
     exceptions: true,
-    // Events
     methods: {
       $onUpdate() {
         this.updatedAt = new Date()
