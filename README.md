@@ -13,7 +13,7 @@ SmartModel
 
 SmartModel is a fun experiment over ES6 Javascript Proxy. 
 
-It tends to bring useful tools and best practices to data objects.
+It tends to bring useful tools and best practices to Javascript data objects.
 
 - [x] Small footprint <2Kb gzipped
 - [x] Value transformation
