@@ -484,7 +484,6 @@ unsubscribe()
 
 #### $check
 
-Static method. 
 Returns an array of potential errors if a payload was passed to the model.
 
 ```javascript
@@ -493,7 +492,6 @@ const errors = Article.$check(payload)
 
 #### $hydrate
 
-Static method. 
 Turns an object or an array of objects into models.
 Useful with API responses.
 
