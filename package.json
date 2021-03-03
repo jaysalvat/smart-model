@@ -19,7 +19,8 @@
     "release": "node ./scripts/release.cjs patch",
     "release:patch": "node ./scripts/release.cjs patch",
     "release:minor": "node ./scripts/release.cjs minor",
-    "release:major": "node ./scripts/release.cjs major"
+    "release:major": "node ./scripts/release.cjs major",
+    "postpublish": "git push origin master --tags"
   },
   "repository": {
     "type": "git",

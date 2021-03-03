@@ -19,7 +19,7 @@ if (dirty) {
 }
 
 sh.info('Bump version')
-sh.exec('npm version ' + version)
+sh.exec('npm version ' + version + ' -m "Release patch v%s"')
 
 sh.info('Build bundles')
 sh.exec('npm run build')
@@ -30,4 +30,4 @@ sh.exec('npm publish')
 sh.info('Commit and push to Github')
 sh.exec('git add .')
 sh.exec('git commit -m "Build v' + sh.pkg(root).version + '"')
-sh.exec('git push')
+sh.exec('git push origin master --tags')
